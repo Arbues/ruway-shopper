@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Filter, X } from "lucide-react";
@@ -30,11 +29,9 @@ const ProductList = () => {
   const [stockFilter, setStockFilter] = useState<string | null>(null);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Page title based on context
   const getPageTitle = () => {
     if (searchQuery) return `Resultados para "${searchQuery}"`;
     if (categorySlug) {
-      // Convert slug to readable name (this would be better with a proper mapping)
       const categoryName = categorySlug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -69,16 +66,13 @@ const ProductList = () => {
     loadProducts();
   }, [categorySlug, searchQuery]);
 
-  // Apply sorting and filtering
   const getFilteredAndSortedProducts = () => {
     let filteredProducts = [...products];
     
-    // Apply stock filter
     if (stockFilter) {
       filteredProducts = filteredProducts.filter(p => p.stockStatus === stockFilter);
     }
     
-    // Apply sorting
     switch (sortOption) {
       case 'price-asc':
         return filteredProducts.sort((a, b) => a.price - b.price);
@@ -98,7 +92,7 @@ const ProductList = () => {
 
   const handleStockFilterChange = (value: string) => {
     if (stockFilter === value) {
-      setStockFilter(null); // Toggle off if already selected
+      setStockFilter(null);
     } else {
       setStockFilter(value);
     }
@@ -109,7 +103,6 @@ const ProductList = () => {
     setSortOption('featured');
   };
 
-  // Filter sidebar content (for both desktop and mobile)
   const FiltersContent = () => (
     <div className="space-y-6">
       <div>
@@ -176,7 +169,6 @@ const ProductList = () => {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 mt-6">
-            {/* Desktop Sidebar Filters */}
             <div className="hidden md:block w-64 flex-shrink-0">
               <div className="sticky top-24 bg-white p-4 rounded-lg border border-gray-200">
                 <h2 className="font-medium text-lg mb-4 text-ruway-secondary">Filtros</h2>
@@ -184,7 +176,6 @@ const ProductList = () => {
               </div>
             </div>
 
-            {/* Mobile Filters Button */}
             <div className="md:hidden flex items-center justify-between mb-4">
               <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
                 <SheetTrigger asChild>
@@ -200,7 +191,6 @@ const ProductList = () => {
                 </SheetContent>
               </Sheet>
 
-              {/* Sort Select (Mobile) */}
               <Select value={sortOption} onValueChange={setSortOption}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Ordenar por" />
@@ -215,9 +205,7 @@ const ProductList = () => {
               </Select>
             </div>
 
-            {/* Product Grid */}
             <div className="flex-1">
-              {/* Sort and Filter Controls (Desktop) */}
               <div className="hidden md:flex items-center justify-between mb-6">
                 <div className="text-sm text-ruway-gray">
                   Mostrando {filteredAndSortedProducts.length} productos
@@ -236,7 +224,6 @@ const ProductList = () => {
                 </Select>
               </div>
 
-              {/* Active Filters */}
               {stockFilter && (
                 <div className="flex items-center mb-4">
                   <div className="text-sm text-ruway-gray mr-2">Filtros activos:</div>

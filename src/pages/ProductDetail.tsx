@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -61,7 +60,7 @@ const ProductDetail = () => {
           // Load related products (same category)
           const allProducts = await fetchProducts();
           const filtered = allProducts
-            .filter(p => p.id !== productId && p.category === productData.category)
+            .filter(p => p.id !== productData.id && p.category === productData.category)
             .slice(0, 4);
           setRelatedProducts(filtered);
         }
