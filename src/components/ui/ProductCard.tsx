@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
@@ -43,7 +44,7 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
         className
       )}
     >
-      <Link to={`/producto/${product.id}`} className="block">
+      <div className="block">
         {/* Stock Label */}
         <div className="absolute top-3 left-3 z-10">
           <span 
@@ -58,70 +59,76 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Product Image */}
-        <div className="relative h-48 w-full bg-ruway-light overflow-hidden">
-          {!isImageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
-          )}
-          <img
-            src={product.image}
-            alt={product.name}
-            className={cn(
-              "w-full h-full object-contain transition-all duration-500 hover:scale-105",
-              !isImageLoaded ? "opacity-0" : "opacity-100"
+        {/* Product Image - Main clickable area */}
+        <Link to={`/producto/${product.id}`} className="block">
+          <div className="relative h-48 w-full bg-ruway-light overflow-hidden">
+            {!isImageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
             )}
-            onLoad={() => setIsImageLoaded(true)}
-          />
-          
-          {/* Quick Actions Overlay */}
-          <div className="absolute inset-0 bg-black/0 flex items-center justify-center gap-2 opacity-0 hover:opacity-100 hover:bg-black/10 transition-all duration-300">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    size="icon"
-                    variant="secondary"
-                    className="rounded-full bg-white text-ruway-secondary hover:bg-white/90"
-                    onClick={handleAddToCart}
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Agregar al carrito</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <img
+              src={product.image}
+              alt={product.name}
+              className={cn(
+                "w-full h-full object-contain transition-all duration-500 hover:scale-105",
+                !isImageLoaded ? "opacity-0" : "opacity-100"
+              )}
+              onLoad={() => setIsImageLoaded(true)}
+            />
             
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link to={`/producto/${product.id}`}>
+            {/* Quick Actions Overlay */}
+            <div className="absolute inset-0 bg-black/0 flex items-center justify-center gap-2 opacity-0 hover:opacity-100 hover:bg-black/10 transition-all duration-300">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Button 
                       size="icon"
                       variant="secondary"
                       className="rounded-full bg-white text-ruway-secondary hover:bg-white/90"
+                      onClick={handleAddToCart}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Agregar al carrito</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      size="icon"
+                      variant="secondary"
+                      className="rounded-full bg-white text-ruway-secondary hover:bg-white/90"
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent parent link from navigating
+                        window.location.href = `/producto/${product.id}`;
+                      }}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ver detalles</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ver detalles</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
-        </div>
+        </Link>
 
         <CardContent className="p-4">
           {/* SKU */}
           <div className="text-xs text-ruway-gray mb-1">#{product.sku}</div>
           
           {/* Product Name */}
-          <h3 className="font-medium text-ruway-secondary hover:text-ruway-primary transition-colors line-clamp-2 h-12">
-            {product.name}
-          </h3>
+          <Link to={`/producto/${product.id}`}>
+            <h3 className="font-medium text-ruway-secondary hover:text-ruway-primary transition-colors line-clamp-2 h-12">
+              {product.name}
+            </h3>
+          </Link>
           
           {/* Price */}
           <div className="mt-2 flex items-baseline">
@@ -144,7 +151,7 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
             Agregar al carrito
           </Button>
         </CardContent>
-      </Link>
+      </div>
     </Card>
   );
 };
