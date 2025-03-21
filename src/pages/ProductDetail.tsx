@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -242,9 +243,9 @@ const ProductDetail = () => {
                     S/ {product.price.toFixed(2)}
                   </span>
                   
-                  {product.originalPrice && (
+                  {product.original_price && (
                     <span className="ml-3 text-lg text-ruway-gray line-through">
-                      S/ {product.originalPrice.toFixed(2)}
+                      S/ {product.original_price.toFixed(2)}
                     </span>
                   )}
                 </div>

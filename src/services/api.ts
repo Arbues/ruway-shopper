@@ -1,6 +1,7 @@
 
 // API service for Supabase integration
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 // Types
 export interface Product {
@@ -64,15 +65,27 @@ export const fetchProducts = async (): Promise<Product[]> => {
     name: product.name,
     description: product.description || '',
     price: Number(product.price),
-    originalPrice: product.original_price ? Number(product.original_price) : undefined,
+    original_price: product.original_price ? Number(product.original_price) : undefined,
     image: product.image || '/placeholder.svg',
     images: product.images || [],
     category: product.categories?.slug || '',
     stockStatus: product.stock_status as 'En Stock' | 'Agotado',
     sku: product.sku,
-    specs: product.specs || {},
+    specs: product.specs ? parseSpecs(product.specs) : {},
     features: product.features || []
   }));
+};
+
+// Helper function to parse and convert specs to the correct format
+const parseSpecs = (specs: Json): { [key: string]: string } => {
+  if (typeof specs === 'object' && specs !== null && !Array.isArray(specs)) {
+    const result: { [key: string]: string } = {};
+    Object.entries(specs).forEach(([key, value]) => {
+      result[key] = String(value);
+    });
+    return result;
+  }
+  return {};
 };
 
 export const fetchProductById = async (id: string): Promise<Product | null> => {
@@ -135,13 +148,13 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
     name: data.name,
     description: data.description || '',
     price: Number(data.price),
-    originalPrice: data.original_price ? Number(data.original_price) : undefined,
+    original_price: data.original_price ? Number(data.original_price) : undefined,
     image: data.image || '/placeholder.svg',
     images: data.images || [],
     category: data.categories?.slug || '',
     stockStatus: data.stock_status as 'En Stock' | 'Agotado',
     sku: data.sku,
-    specs: data.specs || {},
+    specs: data.specs ? parseSpecs(data.specs) : {},
     features: data.features || []
   };
 };
@@ -176,13 +189,13 @@ export const fetchProductsByCategory = async (categorySlug: string): Promise<Pro
     name: product.name,
     description: product.description || '',
     price: Number(product.price),
-    originalPrice: product.original_price ? Number(product.original_price) : undefined,
+    original_price: product.original_price ? Number(product.original_price) : undefined,
     image: product.image || '/placeholder.svg',
     images: product.images || [],
     category: product.categories?.slug || '',
     stockStatus: product.stock_status as 'En Stock' | 'Agotado',
     sku: product.sku,
-    specs: product.specs || {},
+    specs: product.specs ? parseSpecs(product.specs) : {},
     features: product.features || []
   }));
 };
@@ -237,13 +250,13 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
     name: product.name,
     description: product.description || '',
     price: Number(product.price),
-    originalPrice: product.original_price ? Number(product.original_price) : undefined,
+    original_price: product.original_price ? Number(product.original_price) : undefined,
     image: product.image || '/placeholder.svg',
     images: product.images || [],
     category: product.categories?.slug || '',
     stockStatus: product.stock_status as 'En Stock' | 'Agotado',
     sku: product.sku,
-    specs: product.specs || {},
+    specs: product.specs ? parseSpecs(product.specs) : {},
     features: product.features || []
   }));
 };

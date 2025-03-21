@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
@@ -130,9 +129,9 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
               S/ {product.price.toFixed(2)}
             </span>
             
-            {product.originalPrice && (
+            {product.original_price && (
               <span className="ml-2 text-sm text-ruway-gray line-through">
-                S/ {product.originalPrice.toFixed(2)}
+                S/ {product.original_price.toFixed(2)}
               </span>
             )}
           </div>
