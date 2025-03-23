@@ -229,45 +229,6 @@ export type Database = {
         }
         Relationships: []
       }
-      settings: {
-        Row: {
-          address: string | null
-          company_name: string
-          company_slogan: string | null
-          created_at: string
-          email: string | null
-          id: string
-          phone: string | null
-          updated_at: string
-          website: string | null
-          yape_qr: string | null
-        }
-        Insert: {
-          address?: string | null
-          company_name?: string
-          company_slogan?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string
-          website?: string | null
-          yape_qr?: string | null
-        }
-        Update: {
-          address?: string | null
-          company_name?: string
-          company_slogan?: string | null
-          created_at?: string
-          email?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string
-          website?: string | null
-          yape_qr?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never

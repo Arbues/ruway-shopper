@@ -1,3 +1,4 @@
+
 // API service for Supabase integration
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
@@ -32,17 +33,6 @@ export interface User {
   email: string;
   name: string;
   address?: string;
-}
-
-export interface Settings {
-  id: string;
-  company_name: string;
-  company_slogan?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  yape_qr?: string;
 }
 
 // API functions
@@ -269,68 +259,4 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
     specs: product.specs ? parseSpecs(product.specs) : {},
     features: product.features || []
   }));
-};
-
-// Settings API Functions
-export const fetchSettings = async (): Promise<Settings | null> => {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .maybeSingle();
-
-  if (error) {
-    console.error("Error fetching settings:", error);
-    return null;
-  }
-
-  return data;
-};
-
-export const updateSettings = async (settings: Partial<Settings>): Promise<boolean> => {
-  // Check if settings already exist
-  const { data: existingSettings } = await supabase
-    .from('settings')
-    .select('id')
-    .limit(1);
-
-  let result;
-  
-  if (existingSettings && existingSettings.length > 0) {
-    // Update existing settings
-    result = await supabase
-      .from('settings')
-      .update(settings)
-      .eq('id', existingSettings[0].id);
-  } else {
-    // Create new settings
-    result = await supabase
-      .from('settings')
-      .insert(settings);
-  }
-
-  if (result.error) {
-    console.error("Error updating settings:", result.error);
-    return false;
-  }
-
-  return true;
-};
-
-export const uploadSettingsImage = async (file: File, path: string): Promise<string | null> => {
-  const { data, error } = await supabase.storage
-    .from('settings')
-    .upload(path, file, {
-      upsert: true
-    });
-
-  if (error) {
-    console.error("Error uploading file:", error);
-    return null;
-  }
-
-  const { data: urlData } = supabase.storage
-    .from('settings')
-    .getPublicUrl(path);
-
-  return urlData.publicUrl;
 };
