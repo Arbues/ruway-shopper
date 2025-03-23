@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { QrCode, ShieldCheck, MapPin, Phone, Mail, Globe, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,8 +24,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import { fetchSettings, updateSettings, uploadSettingsImage } from "@/services/api";
 
-// Esquema de validación para configuraciones
 const settingsSchema = z.object({
   company_name: z.string().min(1, { message: "El nombre de la empresa es requerido" }),
   company_slogan: z.string().optional(),
@@ -59,16 +58,8 @@ const AdminSettings = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        // Obtener configuraciones
-        const { data: settings, error } = await supabase
-          .from('settings')
-          .select('*')
-          .single();
+        const settings = await fetchSettings();
           
-        if (error && error.code !== 'PGRST116') {
-          throw error;
-        }
-        
         if (settings) {
           form.reset({
             company_name: settings.company_name || "Infinity Wits",
@@ -99,54 +90,27 @@ const AdminSettings = () => {
     try {
       setIsLoading(true);
       
-      // Preparar datos básicos
-      const settingsData = {
+      const settingsData: any = {
         ...values,
+        yape_qr: existingQrUrl
       };
 
-      // Subir QR si hay uno nuevo
       if (qrCode) {
         const filename = `yape_qr_${Date.now()}`;
-        const { data, error } = await supabase.storage
-          .from('settings')
-          .upload(filename, qrCode);
+        const qrUrl = await uploadSettingsImage(qrCode, filename);
           
-        if (error) throw error;
-        
-        // Obtener URL pública
-        const { data: urlData } = supabase.storage
-          .from('settings')
-          .getPublicUrl(filename);
-          
-        settingsData.yape_qr = urlData.publicUrl;
-      } else if (existingQrUrl) {
-        settingsData.yape_qr = existingQrUrl;
+        if (qrUrl) {
+          settingsData.yape_qr = qrUrl;
+        }
       }
       
-      // Verificar si ya existen configuraciones
-      const { data: existingSettings } = await supabase
-        .from('settings')
-        .select('id')
-        .limit(1);
+      const success = await updateSettings(settingsData);
       
-      if (existingSettings && existingSettings.length > 0) {
-        // Actualizar configuraciones existentes
-        const { error } = await supabase
-          .from('settings')
-          .update(settingsData)
-          .eq('id', existingSettings[0].id);
-          
-        if (error) throw error;
+      if (success) {
+        toast.success("Configuraciones guardadas correctamente");
       } else {
-        // Crear nuevas configuraciones
-        const { error } = await supabase
-          .from('settings')
-          .insert(settingsData);
-          
-        if (error) throw error;
+        throw new Error("Error al guardar configuraciones");
       }
-      
-      toast.success("Configuraciones guardadas correctamente");
       
     } catch (error) {
       console.error("Error saving settings:", error);
@@ -162,7 +126,6 @@ const AdminSettings = () => {
     
     setQrCode(file);
     
-    // Crear URL para vista previa
     const previewUrl = URL.createObjectURL(file);
     setQrPreview(previewUrl);
   };
@@ -180,7 +143,6 @@ const AdminSettings = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Información de la Empresa */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Información de la Empresa</h3>
                   
@@ -227,7 +189,6 @@ const AdminSettings = () => {
                   />
                 </div>
                 
-                {/* Información de Contacto */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Información de Contacto</h3>
                   
@@ -277,7 +238,6 @@ const AdminSettings = () => {
               
               <Separator />
               
-              {/* Configuración de Yape */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Configuración de Yape</h3>
                 <p className="text-sm text-muted-foreground">
@@ -300,11 +260,9 @@ const AdminSettings = () => {
                           className="mt-2"
                           onClick={() => {
                             if (existingQrUrl && !qrCode) {
-                              // Si estamos eliminando el QR existente
                               setQrPreview(null);
                               setExistingQrUrl(null);
                             } else {
-                              // Si estamos eliminando un nuevo QR cargado
                               setQrPreview(existingQrUrl);
                               setQrCode(null);
                             }
