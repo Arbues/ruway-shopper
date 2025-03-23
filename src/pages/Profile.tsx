@@ -65,9 +65,7 @@ const Profile = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar */}
-            <div className={fadeIn({
-            direction: 'right'
-          })}>
+            <div className="">
               <Card className="border-gray-200 sticky top-24 mx-0">
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-3">
