@@ -65,7 +65,7 @@ const Navbar = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-white"
+        isScrolled ? "bg-infinitywits-cream/90 backdrop-blur-md shadow-sm" : "bg-infinitywits-cream"
       }`}
     >
       <div className="container-custom">
@@ -75,8 +75,8 @@ const Navbar = () => {
             to="/" 
             className={fadeIn({ direction: 'down' })}
           >
-            <h1 className="text-2xl font-bold text-ruway-secondary">
-              Ruway<span className="text-ruway-primary">.</span>
+            <h1 className="text-2xl font-bold text-infinitywits-navy">
+              Infinity<span className="text-infinitywits-blue">Wits</span>
             </h1>
           </Link>
 
@@ -84,30 +84,30 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/productos" 
-              className="nav-link"
+              className="text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
             >
               Productos
             </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="nav-link flex items-center">
+                <Button variant="ghost" className="text-infinitywits-navy hover:text-infinitywits-blue transition-colors flex items-center">
                   Categorías <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-infinitywits-cream border-infinitywits-navy">
                 <DropdownMenuLabel>Categorías</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/categoria/microcontroladores">Microcontroladores</Link>
+                  <Link to="/categoria/microcontroladores" className="text-infinitywits-navy hover:text-infinitywits-blue">Microcontroladores</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/categoria/herramientas">Herramientas</Link>
+                  <Link to="/categoria/herramientas" className="text-infinitywits-navy hover:text-infinitywits-blue">Herramientas</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/categoria/fuentes-reguladores">Fuentes y Reguladores</Link>
+                  <Link to="/categoria/fuentes-reguladores" className="text-infinitywits-navy hover:text-infinitywits-blue">Fuentes y Reguladores</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/categoria/accesorios-prototipado">Accesorios y Prototipado</Link>
+                  <Link to="/categoria/accesorios-prototipado" className="text-infinitywits-navy hover:text-infinitywits-blue">Accesorios y Prototipado</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -123,7 +123,7 @@ const Navbar = () => {
               <Input
                 type="text"
                 placeholder="Buscar productos..."
-                className="pr-8"
+                className="pr-8 border-infinitywits-navy focus:ring-infinitywits-blue"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
@@ -132,7 +132,7 @@ const Navbar = () => {
                 type="submit"
                 className="absolute inset-y-0 right-0 flex items-center px-2"
               >
-                <Search className="h-5 w-5 text-ruway-gray" />
+                <Search className="h-5 w-5 text-infinitywits-navy" />
               </button>
             </form>
 
@@ -142,37 +142,37 @@ const Navbar = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="rounded-full"
+                  className="rounded-full text-infinitywits-navy hover:text-infinitywits-blue hover:bg-infinitywits-navy/10"
                 >
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-infinitywits-cream border-infinitywits-navy">
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {isAuthenticated ? (
                   <>
                     <DropdownMenuItem>
-                      <span className="text-sm font-medium">Hola, {user?.name}</span>
+                      <span className="text-sm font-medium text-infinitywits-navy">Hola, {user?.name}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/perfil">Mi Perfil</Link>
+                      <Link to="/perfil" className="text-infinitywits-navy hover:text-infinitywits-blue">Mi Perfil</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/pedidos">Mis Pedidos</Link>
+                      <Link to="/pedidos" className="text-infinitywits-navy hover:text-infinitywits-blue">Mis Pedidos</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={logout} className="text-infinitywits-navy hover:text-infinitywits-blue">
                       Cerrar Sesión
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to="/login">Iniciar Sesión</Link>
+                      <Link to="/login" className="text-infinitywits-navy hover:text-infinitywits-blue">Iniciar Sesión</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/registro">Registrarse</Link>
+                      <Link to="/registro" className="text-infinitywits-navy hover:text-infinitywits-blue">Registrarse</Link>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -183,12 +183,12 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full relative"
+              className="rounded-full relative text-infinitywits-navy hover:text-infinitywits-blue hover:bg-infinitywits-navy/10"
               onClick={toggleCart}
             >
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-ruway-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-1 -right-1 bg-infinitywits-blue text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {totalItems}
                 </span>
               )}
@@ -200,25 +200,26 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden"
+                  className="md:hidden text-infinitywits-navy hover:text-infinitywits-blue hover:bg-infinitywits-navy/10"
                   onClick={() => setIsMobileMenuOpen(true)}
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
+              <SheetContent side="left" className="bg-infinitywits-cream border-infinitywits-navy">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between mb-8">
                     <Link 
                       to="/" 
-                      className="text-xl font-bold text-ruway-secondary"
+                      className="text-xl font-bold text-infinitywits-navy"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Ruway<span className="text-ruway-primary">.</span>
+                      Infinity<span className="text-infinitywits-blue">Wits</span>
                     </Link>
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="text-infinitywits-navy hover:text-infinitywits-blue hover:bg-infinitywits-navy/10"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <X className="h-5 w-5" />
@@ -231,7 +232,7 @@ const Navbar = () => {
                       <Input
                         type="text"
                         placeholder="Buscar productos..."
-                        className="w-full pr-8"
+                        className="w-full pr-8 border-infinitywits-navy focus:ring-infinitywits-blue"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -239,7 +240,7 @@ const Navbar = () => {
                         type="submit"
                         className="absolute inset-y-0 right-0 flex items-center px-2"
                       >
-                        <Search className="h-5 w-5 text-ruway-gray" />
+                        <Search className="h-5 w-5 text-infinitywits-navy" />
                       </button>
                     </div>
                   </form>
@@ -248,38 +249,38 @@ const Navbar = () => {
                   <nav className="flex flex-col space-y-4">
                     <Link
                       to="/productos"
-                      className="py-2 text-ruway-secondary hover:text-ruway-primary transition-colors"
+                      className="py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Todos los Productos
                     </Link>
                     <div className="py-2">
-                      <h3 className="font-medium mb-2">Categorías</h3>
+                      <h3 className="font-medium mb-2 text-infinitywits-navy">Categorías</h3>
                       <div className="flex flex-col space-y-2 pl-4">
                         <Link
                           to="/categoria/microcontroladores"
-                          className="text-ruway-gray hover:text-ruway-primary transition-colors"
+                          className="text-infinitywits-blue hover:text-infinitywits-navy transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Microcontroladores
                         </Link>
                         <Link
                           to="/categoria/herramientas"
-                          className="text-ruway-gray hover:text-ruway-primary transition-colors"
+                          className="text-infinitywits-blue hover:text-infinitywits-navy transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Herramientas
                         </Link>
                         <Link
                           to="/categoria/fuentes-reguladores"
-                          className="text-ruway-gray hover:text-ruway-primary transition-colors"
+                          className="text-infinitywits-blue hover:text-infinitywits-navy transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Fuentes y Reguladores
                         </Link>
                         <Link
                           to="/categoria/accesorios-prototipado"
-                          className="text-ruway-gray hover:text-ruway-primary transition-colors"
+                          className="text-infinitywits-blue hover:text-infinitywits-navy transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Accesorios y Prototipado
@@ -291,17 +292,17 @@ const Navbar = () => {
                   <div className="mt-auto">
                     {isAuthenticated ? (
                       <div className="space-y-2">
-                        <div className="text-sm font-medium">Hola, {user?.name}</div>
+                        <div className="text-sm font-medium text-infinitywits-navy">Hola, {user?.name}</div>
                         <Link
                           to="/perfil"
-                          className="block py-2 text-ruway-secondary hover:text-ruway-primary transition-colors"
+                          className="block py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Mi Perfil
                         </Link>
                         <Link
                           to="/pedidos"
-                          className="block py-2 text-ruway-secondary hover:text-ruway-primary transition-colors"
+                          className="block py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Mis Pedidos
@@ -314,7 +315,7 @@ const Navbar = () => {
                             setIsMobileMenuOpen(false);
                           }}
                         >
-                          <span className="py-2 text-ruway-secondary hover:text-ruway-primary transition-colors">
+                          <span className="py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors">
                             Cerrar Sesión
                           </span>
                         </Button>
@@ -323,14 +324,14 @@ const Navbar = () => {
                       <div className="space-y-2">
                         <Link
                           to="/login"
-                          className="block py-2 text-ruway-secondary hover:text-ruway-primary transition-colors"
+                          className="block py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Iniciar Sesión
                         </Link>
                         <Link
                           to="/registro"
-                          className="block py-2 text-ruway-secondary hover:text-ruway-primary transition-colors"
+                          className="block py-2 text-infinitywits-navy hover:text-infinitywits-blue transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Registrarse

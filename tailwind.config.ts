@@ -25,7 +25,7 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-                // Nuevos colores basados en la imagen
+                // Colores basados en la imagen proporcionada
                 infinitywits: {
                     cream: '#F5F2DF',       // Color base crema
                     navy: '#0A3175',        // Azul marino oscuro

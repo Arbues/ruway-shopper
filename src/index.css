@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 60 50% 92%;  /* Cream background */
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -16,65 +16,65 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 211 100% 52%; /* Ruway primary blue */
+    --primary: 217 80% 25%;    /* Navy blue */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5.9% 10%;
+    --secondary: 212 38% 55%;  /* Medium blue */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 4.8% 95.9%;
+    --muted: 210 30% 85%;      /* Light blue */
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 142 100% 40%; /* Ruway accent green */
+    --accent: 142 100% 40%;    /* Keep accent green for status */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 211 100% 52%; /* Matches primary */
+    --border: 217 80% 25%;     /* Navy blue border */
+    --input: 217 80% 25%;      /* Navy blue input */
+    --ring: 217 80% 25%;       /* Navy blue ring */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 60 50% 92%;  /* Cream */
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 217 80% 25%;    /* Navy blue */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 212 38% 55%;     /* Medium blue */
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 217 80% 25%;     /* Navy blue */
+    --sidebar-ring: 217 80% 25%;       /* Navy blue */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 217 80% 25%;    /* Navy blue */
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 217 80% 25%;          /* Navy blue */
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 217 80% 25%;       /* Navy blue */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 211 100% 52%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 60 50% 92%;        /* Cream */
+    --primary-foreground: 217 80% 25%; /* Navy blue */
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 212 38% 55%;     /* Medium blue */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
+    --muted: 212 38% 55%;         /* Medium blue */
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 142 100% 40%;
+    --accent: 142 100% 40%;       /* Keep accent green */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 211 100% 52%;
+    --border: 212 38% 55%;        /* Medium blue */
+    --input: 212 38% 55%;         /* Medium blue */
+    --ring: 212 38% 55%;          /* Medium blue */
   }
 }
 
@@ -84,7 +84,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-infinitywits-cream text-foreground antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -99,7 +99,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-ruway-gray/30 hover:bg-ruway-gray/50 rounded-full transition-colors;
+    @apply bg-infinitywits-navy/30 hover:bg-infinitywits-navy/50 rounded-full transition-colors;
   }
 }
 
@@ -115,15 +115,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-ruway-primary text-white hover:bg-ruway-primary/90 py-2 px-4 rounded-md transition-standard;
+    @apply bg-infinitywits-navy text-white hover:bg-infinitywits-navy/90 py-2 px-4 rounded-md transition-standard;
   }
 
   .btn-secondary {
-    @apply bg-ruway-secondary text-white hover:bg-ruway-secondary/90 py-2 px-4 rounded-md transition-standard;
+    @apply bg-infinitywits-blue text-white hover:bg-infinitywits-blue/90 py-2 px-4 rounded-md transition-standard;
   }
 
   .btn-outline {
-    @apply border border-ruway-secondary text-ruway-secondary hover:bg-ruway-secondary/5 py-2 px-4 rounded-md transition-standard;
+    @apply border border-infinitywits-navy text-infinitywits-navy hover:bg-infinitywits-navy/5 py-2 px-4 rounded-md transition-standard;
   }
 
   .card-hover {
@@ -139,15 +139,15 @@
   }
 
   .nav-link {
-    @apply text-ruway-secondary hover:text-ruway-primary transition-standard;
+    @apply text-infinitywits-navy hover:text-infinitywits-blue transition-standard;
   }
 
   .headline {
-    @apply text-3xl md:text-4xl font-bold text-ruway-secondary;
+    @apply text-3xl md:text-4xl font-bold text-infinitywits-navy;
   }
 
   .subheadline {
-    @apply text-xl font-medium text-ruway-gray;
+    @apply text-xl font-medium text-infinitywits-blue;
   }
 
   .container-custom {
