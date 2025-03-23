@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
-  Search, 
   ShoppingCart, 
   User, 
   Menu, 
@@ -10,7 +9,6 @@ import {
   ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -24,12 +22,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import CartSidebar from "@/components/cart/CartSidebar";
 import { fadeIn } from "@/utils/animations";
+import SearchBar from "@/components/search/SearchBar";
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { totalItems, toggleCart } = useCart();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -47,20 +45,6 @@ const Navbar = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery("");
-    }
-  };
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch(e);
-    }
-  };
 
   return (
     <header
@@ -116,25 +100,9 @@ const Navbar = () => {
           {/* Search + User Actions */}
           <div className="flex items-center space-x-4">
             {/* Search */}
-            <form 
-              onSubmit={handleSearch} 
-              className="hidden md:flex relative rounded-md w-64"
-            >
-              <Input
-                type="text"
-                placeholder="Buscar productos..."
-                className="pr-8 border-infinitywits-navy focus:ring-infinitywits-blue"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-              />
-              <button
-                type="submit"
-                className="absolute inset-y-0 right-0 flex items-center px-2"
-              >
-                <Search className="h-5 w-5 text-infinitywits-navy" />
-              </button>
-            </form>
+            <div className="hidden md:block w-64">
+              <SearchBar />
+            </div>
 
             {/* User Menu */}
             <DropdownMenu>
@@ -227,23 +195,9 @@ const Navbar = () => {
                   </div>
 
                   {/* Mobile Search */}
-                  <form onSubmit={handleSearch} className="mb-6">
-                    <div className="relative">
-                      <Input
-                        type="text"
-                        placeholder="Buscar productos..."
-                        className="w-full pr-8 border-infinitywits-navy focus:ring-infinitywits-blue"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                      <button
-                        type="submit"
-                        className="absolute inset-y-0 right-0 flex items-center px-2"
-                      >
-                        <Search className="h-5 w-5 text-infinitywits-navy" />
-                      </button>
-                    </div>
-                  </form>
+                  <div className="mb-6">
+                    <SearchBar isMobile={true} />
+                  </div>
 
                   {/* Mobile Links */}
                   <nav className="flex flex-col space-y-4">
