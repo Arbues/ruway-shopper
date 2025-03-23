@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { User, PackageCheck, LogOut, Settings, UserCheck } from "lucide-react";
@@ -6,27 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { fadeIn } from "@/utils/animations";
-
 const Profile = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    logout
+  } = useAuth();
 
   // If not authenticated, redirect to login
   if (!isAuthenticated) {
@@ -40,30 +30,31 @@ const Profile = () => {
     phone: "",
     address: "",
     city: "",
-    postalCode: "",
+    postalCode: ""
   });
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+    const {
+      name,
+      value
+    } = e.target;
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, this would update the user profile
     alert("Perfil actualizado exitosamente");
   };
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow pt-24 pb-16">
         <div className="container-custom">
-          <div className={fadeIn({ direction: 'down' })}>
+          <div className={fadeIn({
+          direction: 'down'
+        })}>
             <h1 className="text-3xl font-bold text-ruway-secondary mb-2">
               Mi Cuenta
             </h1>
@@ -74,8 +65,10 @@ const Profile = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar */}
-            <div className={fadeIn({ direction: 'right' })}>
-              <Card className="border-gray-200 sticky top-24">
+            <div className={fadeIn({
+            direction: 'right'
+          })}>
+              <Card className="border-gray-200 sticky top-24 mx-0">
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-ruway-primary/10 flex items-center justify-center">
@@ -108,11 +101,7 @@ const Profile = () => {
                   </Button>
                 </CardContent>
                 <CardFooter className="pt-0">
-                  <Button 
-                    variant="outline" 
-                    className="w-full text-ruway-gray"
-                    onClick={logout}
-                  >
+                  <Button variant="outline" className="w-full text-ruway-gray" onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Cerrar Sesión
                   </Button>
@@ -122,7 +111,9 @@ const Profile = () => {
 
             {/* Main Content */}
             <div className="lg:col-span-3">
-              <Tabs defaultValue="personal" className={fadeIn({ direction: 'left' })}>
+              <Tabs defaultValue="personal" className={fadeIn({
+              direction: 'left'
+            })}>
                 <TabsList className="mb-6">
                   <TabsTrigger value="personal">Información Personal</TabsTrigger>
                   <TabsTrigger value="shipping">Direcciones de Envío</TabsTrigger>
@@ -142,65 +133,27 @@ const Profile = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="name">Nombre Completo</Label>
-                            <Input
-                              id="name"
-                              name="name"
-                              value={formData.name}
-                              onChange={handleInputChange}
-                              placeholder="Tu nombre completo"
-                            />
+                            <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Tu nombre completo" />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="email">Correo Electrónico</Label>
-                            <Input
-                              id="email"
-                              name="email"
-                              type="email"
-                              value={formData.email}
-                              onChange={handleInputChange}
-                              placeholder="tu@email.com"
-                              disabled
-                            />
+                            <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="tu@email.com" disabled />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="phone">Teléfono</Label>
-                            <Input
-                              id="phone"
-                              name="phone"
-                              value={formData.phone}
-                              onChange={handleInputChange}
-                              placeholder="987654321"
-                            />
+                            <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="987654321" />
                           </div>
                           <div className="md:col-span-2 space-y-2">
                             <Label htmlFor="address">Dirección</Label>
-                            <Input
-                              id="address"
-                              name="address"
-                              value={formData.address}
-                              onChange={handleInputChange}
-                              placeholder="Tu dirección"
-                            />
+                            <Input id="address" name="address" value={formData.address} onChange={handleInputChange} placeholder="Tu dirección" />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="city">Ciudad</Label>
-                            <Input
-                              id="city"
-                              name="city"
-                              value={formData.city}
-                              onChange={handleInputChange}
-                              placeholder="Tu ciudad"
-                            />
+                            <Input id="city" name="city" value={formData.city} onChange={handleInputChange} placeholder="Tu ciudad" />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="postalCode">Código Postal</Label>
-                            <Input
-                              id="postalCode"
-                              name="postalCode"
-                              value={formData.postalCode}
-                              onChange={handleInputChange}
-                              placeholder="15000"
-                            />
+                            <Input id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleInputChange} placeholder="15000" />
                           </div>
                         </div>
                         
@@ -282,8 +235,6 @@ const Profile = () => {
       </main>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Profile;
