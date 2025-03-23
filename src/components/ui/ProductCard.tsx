@@ -31,6 +31,12 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
     addItem(product, 1);
   };
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = `/producto/${product.id}`;
+  };
+
   return (
     <Card 
       className={cn(
@@ -59,7 +65,7 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Product Image - Main clickable area */}
+        {/* Product Image */}
         <Link to={`/producto/${product.id}`} className="block">
           <div className="relative h-48 w-full bg-ruway-light overflow-hidden">
             {!isImageLoaded && (
@@ -102,10 +108,7 @@ const ProductCard = ({ product, className, index = 0 }: ProductCardProps) => {
                       size="icon"
                       variant="secondary"
                       className="rounded-full bg-white text-ruway-secondary hover:bg-white/90"
-                      onClick={(e) => {
-                        e.preventDefault(); // Prevent parent link from navigating
-                        window.location.href = `/producto/${product.id}`;
-                      }}
+                      onClick={handleViewDetails}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>

@@ -25,12 +25,19 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+                // Nuevos colores basados en la imagen
+                infinitywits: {
+                    cream: '#F5F2DF',       // Color base crema
+                    navy: '#0A3175',        // Azul marino oscuro
+                    blue: '#5E88B9',        // Azul medio
+                    lightblue: '#C8D8E8',   // Azul claro
+                },
 				ruway: {
-					primary: '#0A84FF', // Brand primary blue
+					primary: '#0A3175', // Actualizado a azul marino 
 					secondary: '#222222', // Dark gray for text
 					accent: '#00C569', // Green for accents, available stock
-					light: '#F5F5F7', // Light background
-					dark: '#1D1D1F', // Almost black
+					light: '#F5F2DF', // Actualizado a crema claro
+					dark: '#0A3175', // Actualizado a azul marino
 					gray: '#86868B', // Neutral gray for sub-text
 				},
 				primary: {
