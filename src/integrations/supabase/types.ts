@@ -209,22 +209,31 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          dni: string | null
           id: string
+          is_email_optional: boolean | null
           name: string | null
+          phone: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           created_at?: string
+          dni?: string | null
           id: string
+          is_email_optional?: boolean | null
           name?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           created_at?: string
+          dni?: string | null
           id?: string
+          is_email_optional?: boolean | null
           name?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []

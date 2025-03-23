@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Lock, AlertCircle } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User, Mail, Lock, AlertCircle, CreditCard, Phone } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -22,15 +22,17 @@ import { fadeIn } from "@/utils/animations";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, isLoading, error } = useAuth();
   
   const [name, setName] = useState("");
+  const [dni, setDni] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   
-  const [passwordError, setPasswordError] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
@@ -38,14 +40,28 @@ const Register = () => {
     let isValid = true;
 
     if (!name.trim()) {
-      errors.name = "El nombre es requerido";
+      errors.name = "El nombre completo es requerido";
       isValid = false;
     }
 
-    if (!email.trim()) {
-      errors.email = "El correo electrónico es requerido";
+    if (!dni.trim()) {
+      errors.dni = "El DNI es requerido";
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/^\d{8}$/.test(dni)) {
+      errors.dni = "El DNI debe tener 8 dígitos";
+      isValid = false;
+    }
+
+    if (!phone.trim()) {
+      errors.phone = "El teléfono es requerido";
+      isValid = false;
+    } else if (!/^\d{9}$/.test(phone)) {
+      errors.phone = "El teléfono debe tener 9 dígitos";
+      isValid = false;
+    }
+
+    // Email is optional, but if provided, should be valid
+    if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
       errors.email = "Correo electrónico inválido";
       isValid = false;
     }
@@ -80,8 +96,7 @@ const Register = () => {
     }
     
     try {
-      await register(name, email, password);
-      navigate("/");
+      await register(name, dni, phone, email.trim() ? email : null, password, navigate);
     } catch (error) {
       console.error("Registration error:", error);
     }
@@ -97,13 +112,13 @@ const Register = () => {
             <Card className="shadow-md border-gray-200">
               <CardHeader className="space-y-1">
                 <div className="flex justify-center mb-2">
-                  <div className="w-12 h-12 rounded-full bg-ruway-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-ruway-primary" />
+                  <div className="w-12 h-12 rounded-full bg-infinitywits-light flex items-center justify-center">
+                    <User className="h-6 w-6 text-infinitywits-navy" />
                   </div>
                 </div>
                 <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
                 <CardDescription className="text-center">
-                  Regístrate para empezar a comprar en Ruway
+                  Regístrate para empezar a comprar en InfinityWits
                 </CardDescription>
               </CardHeader>
               
@@ -117,10 +132,10 @@ const Register = () => {
                   )}
                   
                   <div className="space-y-1">
-                    <Label htmlFor="name">Nombre Completo</Label>
+                    <Label htmlFor="name">Nombre Completo *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <User className="h-4 w-4 text-ruway-gray" />
+                        <User className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="name"
@@ -136,12 +151,54 @@ const Register = () => {
                       <p className="text-xs text-destructive mt-1">{formErrors.name}</p>
                     )}
                   </div>
-                  
+
                   <div className="space-y-1">
-                    <Label htmlFor="email">Correo Electrónico</Label>
+                    <Label htmlFor="dni">DNI *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <Mail className="h-4 w-4 text-ruway-gray" />
+                        <CreditCard className="h-4 w-4 text-infinitywits-gray" />
+                      </div>
+                      <Input
+                        id="dni"
+                        type="text"
+                        value={dni}
+                        onChange={(e) => setDni(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                        placeholder="12345678"
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    {formErrors.dni && (
+                      <p className="text-xs text-destructive mt-1">{formErrors.dni}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="phone">Teléfono *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <Phone className="h-4 w-4 text-infinitywits-gray" />
+                      </div>
+                      <Input
+                        id="phone"
+                        type="text"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                        placeholder="987654321"
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    {formErrors.phone && (
+                      <p className="text-xs text-destructive mt-1">{formErrors.phone}</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="email">Correo Electrónico (opcional)</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <Mail className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="email"
@@ -150,7 +207,6 @@ const Register = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="correo@ejemplo.com"
                         className="pl-10"
-                        required
                       />
                     </div>
                     {formErrors.email && (
@@ -159,23 +215,16 @@ const Register = () => {
                   </div>
                   
                   <div className="space-y-1">
-                    <Label htmlFor="password">Contraseña</Label>
+                    <Label htmlFor="password">Contraseña *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <Lock className="h-4 w-4 text-ruway-gray" />
+                        <Lock className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="password"
                         type="password"
                         value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setPasswordError(
-                            e.target.value.length < 6
-                              ? "La contraseña debe tener al menos 6 caracteres"
-                              : ""
-                          );
-                        }}
+                        onChange={(e) => setPassword(e.target.value)}
                         placeholder="********"
                         className="pl-10"
                         required
@@ -187,10 +236,10 @@ const Register = () => {
                   </div>
                   
                   <div className="space-y-1">
-                    <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                    <Label htmlFor="confirmPassword">Confirmar Contraseña *</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <Lock className="h-4 w-4 text-ruway-gray" />
+                        <Lock className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="confirmPassword"
@@ -216,14 +265,14 @@ const Register = () => {
                     />
                     <Label 
                       htmlFor="terms" 
-                      className="text-sm text-ruway-gray cursor-pointer"
+                      className="text-sm text-infinitywits-gray cursor-pointer"
                     >
                       Acepto los{" "}
-                      <Link to="/terminos-condiciones" className="text-ruway-primary hover:underline">
+                      <Link to="/terminos-condiciones" className="text-infinitywits-blue hover:underline">
                         Términos y Condiciones
                       </Link>{" "}
                       y la{" "}
-                      <Link to="/privacidad" className="text-ruway-primary hover:underline">
+                      <Link to="/privacidad" className="text-infinitywits-blue hover:underline">
                         Política de Privacidad
                       </Link>
                     </Label>
@@ -241,9 +290,13 @@ const Register = () => {
                   >
                     {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                   </Button>
-                  <div className="text-center text-sm text-ruway-gray">
+                  <div className="text-center text-sm text-infinitywits-gray">
                     ¿Ya tienes una cuenta?{" "}
-                    <Link to="/login" className="text-ruway-primary hover:underline">
+                    <Link 
+                      to="/login" 
+                      state={{ from: location.state?.from }} 
+                      className="text-infinitywits-blue hover:underline"
+                    >
                       Iniciar Sesión
                     </Link>
                   </div>

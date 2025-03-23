@@ -1,7 +1,7 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { User, Lock, AlertCircle, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User, Lock, AlertCircle } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -22,18 +22,28 @@ import { fadeIn } from "@/utils/animations";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error } = useAuth();
+  const location = useLocation();
+  const { login, isLoading, error, isAuthenticated } = useAuth();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
+  // Get the redirect path from the location state or use "/"
+  const from = location.state?.from?.pathname || "/";
+
+  // If already authenticated, redirect to the original page
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from);
+    }
+  }, [isAuthenticated, navigate, from]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      await login(email, password);
-      navigate("/");
+      await login(email, password, navigate, from);
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -49,8 +59,8 @@ const Login = () => {
             <Card className="shadow-md border-gray-200">
               <CardHeader className="space-y-1">
                 <div className="flex justify-center mb-2">
-                  <div className="w-12 h-12 rounded-full bg-ruway-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-ruway-primary" />
+                  <div className="w-12 h-12 rounded-full bg-infinitywits-light flex items-center justify-center">
+                    <User className="h-6 w-6 text-infinitywits-navy" />
                   </div>
                 </div>
                 <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
@@ -72,7 +82,7 @@ const Login = () => {
                     <Label htmlFor="email">Correo Electrónico</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <User className="h-4 w-4 text-ruway-gray" />
+                        <User className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="email"
@@ -89,13 +99,13 @@ const Login = () => {
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Contraseña</Label>
-                      <Link to="/recuperar-password" className="text-xs text-ruway-primary hover:underline">
+                      <Link to="/recuperar-password" className="text-xs text-infinitywits-blue hover:underline">
                         ¿Olvidaste tu contraseña?
                       </Link>
                     </div>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <Lock className="h-4 w-4 text-ruway-gray" />
+                        <Lock className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
                         id="password"
@@ -117,7 +127,7 @@ const Login = () => {
                     />
                     <Label 
                       htmlFor="remember" 
-                      className="text-sm text-ruway-gray cursor-pointer"
+                      className="text-sm text-infinitywits-gray cursor-pointer"
                     >
                       Recordarme
                     </Label>
@@ -132,9 +142,13 @@ const Login = () => {
                   >
                     {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
-                  <div className="text-center text-sm text-ruway-gray">
+                  <div className="text-center text-sm text-infinitywits-gray">
                     ¿No tienes una cuenta?{" "}
-                    <Link to="/registro" className="text-ruway-primary hover:underline">
+                    <Link 
+                      to="/registro" 
+                      state={{ from: location.state?.from }} 
+                      className="text-infinitywits-blue hover:underline"
+                    >
                       Regístrate
                     </Link>
                   </div>
@@ -143,9 +157,9 @@ const Login = () => {
             </Card>
             
             <div className="mt-6 text-center">
-              <div className="text-xs text-ruway-gray">
+              <div className="text-xs text-infinitywits-gray">
                 Para pruebas, puedes iniciar sesión con:<br />
-                Email: <span className="font-medium">demo@ruway.com</span><br />
+                Email: <span className="font-medium">demo@infinitywits.com</span><br />
                 Contraseña: <span className="font-medium">password</span>
               </div>
             </div>

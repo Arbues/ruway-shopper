@@ -6,8 +6,10 @@ import { toast } from 'sonner';
 // Types
 export interface User {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
+  dni: string | null;
+  phone: string | null;
   isAdmin: boolean;
 }
 
@@ -15,8 +17,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, navigate: (path: string) => void, from?: string) => Promise<void>;
+  register: (name: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => Promise<void>;
   logout: () => void;
   error: string | null;
 }
@@ -49,10 +51,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Check if this is the admin user
           const isAdmin = authUser.email === ADMIN_CREDENTIALS.email;
           
+          // Get user profile data
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, dni, phone')
+            .eq('id', authUser.id)
+            .single();
+          
           setUser({
             id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.name || ADMIN_CREDENTIALS.name,
+            email: authUser.email,
+            name: profileData?.name || authUser.user_metadata?.name || ADMIN_CREDENTIALS.name,
+            dni: profileData?.dni || authUser.user_metadata?.dni || null,
+            phone: profileData?.phone || authUser.user_metadata?.phone || null,
             isAdmin
           });
         }
@@ -72,10 +83,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const authUser = session.user;
           const isAdmin = authUser.email === ADMIN_CREDENTIALS.email;
           
+          // Get user profile data
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, dni, phone')
+            .eq('id', authUser.id)
+            .single();
+          
           setUser({
             id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.name || '',
+            email: authUser.email,
+            name: profileData?.name || authUser.user_metadata?.name || '',
+            dni: profileData?.dni || authUser.user_metadata?.dni || null,
+            phone: profileData?.phone || authUser.user_metadata?.phone || null,
             isAdmin
           });
         } else {
@@ -90,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, navigate: (path: string) => void, from: string = '/') => {
     setIsLoading(true);
     setError(null);
     
@@ -107,11 +127,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (data.user) {
           setUser({
             id: data.user.id,
-            email: data.user.email || '',
+            email: data.user.email,
             name: ADMIN_CREDENTIALS.name,
+            dni: null,
+            phone: null,
             isAdmin: true
           });
           toast.success("¡Bienvenido, Administrador!");
+          navigate(from);
         }
       } else {
         // Regular user login
@@ -123,13 +146,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (signInError) throw signInError;
         
         if (data.user) {
+          // Get user profile data
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, dni, phone')
+            .eq('id', data.user.id)
+            .single();
+          
           setUser({
             id: data.user.id,
-            email: data.user.email || '',
-            name: data.user.user_metadata?.name || '',
+            email: data.user.email,
+            name: profileData?.name || data.user.user_metadata?.name || '',
+            dni: profileData?.dni || data.user.user_metadata?.dni || null,
+            phone: profileData?.phone || data.user.user_metadata?.phone || null,
             isAdmin: false
           });
           toast.success("¡Inicio de sesión exitoso!");
+          navigate(from);
         }
       }
     } catch (err) {
@@ -141,11 +174,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // Check if email is provided (optional)
+      if (!email) {
+        // Generate a placeholder email using dni
+        email = `user_${dni}@placeholder.com`;
+      }
+      
       // Prevent registration with admin email
       if (email === ADMIN_CREDENTIALS.email) {
         throw new Error("Este correo electrónico no está disponible para registro");
@@ -157,6 +196,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         options: {
           data: {
             name,
+            dni,
+            phone
           },
         },
       });
@@ -166,11 +207,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user) {
         setUser({
           id: data.user.id,
-          email: data.user.email || '',
-          name: data.user.user_metadata?.name || '',
+          email: data.user.email,
+          name: name,
+          dni: dni,
+          phone: phone,
           isAdmin: false
         });
         toast.success("¡Registro exitoso!");
+        navigate('/');
       }
     } catch (err) {
       console.error("Registration error:", err);
