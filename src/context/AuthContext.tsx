@@ -54,11 +54,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const isAdmin = authUser.email === ADMIN_CREDENTIALS.email;
           
           // Get user profile data
-          const { data: profileData } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('name, dni, phone, username')
+            .select('username, name, dni, phone')
             .eq('id', authUser.id)
             .single();
+          
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          }
           
           setUser({
             id: authUser.id,
@@ -87,11 +91,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const isAdmin = authUser.email === ADMIN_CREDENTIALS.email;
           
           // Get user profile data
-          const { data: profileData } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('name, dni, phone, username')
+            .select('username, name, dni, phone')
             .eq('id', authUser.id)
             .single();
+          
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          }
           
           setUser({
             id: authUser.id,
@@ -155,19 +163,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
         } else {
           // Find user by username
-          const { data: users } = await supabase
+          const { data: profiles, error: profileError } = await supabase
             .from('profiles')
-            .select('id, email')
+            .select('id')
             .eq('username', identifier)
-            .single();
+            .maybeSingle();
           
-          if (!users || !users.email) {
+          if (profileError) {
+            console.error('Error finding user by username:', profileError);
+            throw new Error('Error al buscar usuario por nombre de usuario');
+          }
+          
+          if (!profiles) {
+            throw new Error('Usuario no encontrado');
+          }
+          
+          // Get user email from auth
+          const { data: authData, error: authError } = await supabase.auth.admin.getUserById(
+            profiles.id
+          );
+          
+          if (authError || !authData || !authData.user.email) {
             throw new Error('Usuario no encontrado');
           }
           
           // Login with the found email
           signInResult = await supabase.auth.signInWithPassword({
-            email: users.email,
+            email: authData.user.email,
             password,
           });
         }
@@ -178,11 +200,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (data.user) {
           // Get user profile data
-          const { data: profileData } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('name, dni, phone, username')
+            .select('username, name, dni, phone')
             .eq('id', data.user.id)
             .single();
+          
+          if (profileError) {
+            console.error('Error fetching profile after login:', profileError);
+          }
           
           setUser({
             id: data.user.id,
@@ -222,11 +248,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Check if username already exists
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: usernameError } = await supabase
         .from('profiles')
         .select('username')
         .eq('username', username)
         .maybeSingle();
+      
+      if (usernameError) {
+        console.error('Error checking username:', usernameError);
+      }
       
       if (existingUser) {
         throw new Error("El nombre de usuario ya está en uso");
