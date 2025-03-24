@@ -1,3 +1,4 @@
+
 // API service for Supabase integration
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
@@ -18,6 +19,7 @@ export interface Product {
     [key: string]: string;
   };
   features?: string[];
+  diagram_image?: string;
 }
 
 export interface Category {
@@ -61,6 +63,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
       sku, 
       specs, 
       features,
+      diagram_image,
       category_id,
       categories(name, slug)
     `);
@@ -82,7 +85,8 @@ export const fetchProducts = async (): Promise<Product[]> => {
     stockStatus: product.stock_status as 'En Stock' | 'Agotado',
     sku: product.sku,
     specs: product.specs ? parseSpecs(product.specs) : {},
-    features: product.features || []
+    features: product.features || [],
+    diagram_image: product.diagram_image || undefined
   }));
 };
 
@@ -114,6 +118,7 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
       sku, 
       specs, 
       features,
+      diagram_image,
       category_id,
       categories(name, slug)
     `)
@@ -136,6 +141,7 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
         sku, 
         specs, 
         features,
+        diagram_image,
         category_id,
         categories(name, slug)
       `)
@@ -165,7 +171,8 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
     stockStatus: data.stock_status as 'En Stock' | 'Agotado',
     sku: data.sku,
     specs: data.specs ? parseSpecs(data.specs) : {},
-    features: data.features || []
+    features: data.features || [],
+    diagram_image: data.diagram_image || undefined
   };
 };
 

@@ -9,7 +9,8 @@ import {
   Share2, 
   Check, 
   ChevronRight, 
-  ArrowLeft
+  ArrowLeft,
+  Image as ImageIcon
 } from "lucide-react";
 import { 
   Tabs, 
@@ -27,6 +28,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/ProductCard";
@@ -121,6 +128,16 @@ const ProductDetail = () => {
     );
   }
 
+  // Ensure we always have exactly 5 images to display
+  const displayImages = Array.isArray(product.images) && product.images.length > 0 
+    ? [...product.images].slice(0, 5) 
+    : [product.image || '/placeholder.svg'];
+  
+  // Fill with placeholders if needed
+  while (displayImages.length < 5) {
+    displayImages.push('/placeholder.svg');
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -178,7 +195,7 @@ const ProductDetail = () => {
                     <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
                   )}
                   <img
-                    src={product.images?.[activeImage] || product.image}
+                    src={displayImages[activeImage]}
                     alt={product.name}
                     className={cn(
                       "w-full h-full object-contain transition-opacity duration-300",
@@ -188,29 +205,27 @@ const ProductDetail = () => {
                   />
                 </div>
                 
-                {/* Thumbnail Images */}
-                {product.images && product.images.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto pb-2">
-                    {product.images.map((image, index) => (
-                      <button
-                        key={index}
-                        className={cn(
-                          "w-20 h-20 rounded-md border overflow-hidden flex-shrink-0 transition-all",
-                          activeImage === index
-                            ? "border-ruway-primary ring-2 ring-ruway-primary/20"
-                            : "border-gray-200 hover:border-gray-300"
-                        )}
-                        onClick={() => setActiveImage(index)}
-                      >
-                        <img
-                          src={image}
-                          alt={`${product.name} - vista ${index + 1}`}
-                          className="w-full h-full object-contain"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* Thumbnail Images - Always show 5 */}
+                <div className="grid grid-cols-5 gap-2">
+                  {displayImages.map((image, index) => (
+                    <button
+                      key={index}
+                      className={cn(
+                        "h-20 rounded-md border overflow-hidden flex-shrink-0 transition-all",
+                        activeImage === index
+                          ? "border-ruway-primary ring-2 ring-ruway-primary/20"
+                          : "border-gray-200 hover:border-gray-300"
+                      )}
+                      onClick={() => setActiveImage(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`${product.name} - vista ${index + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -347,19 +362,29 @@ const ProductDetail = () => {
 
           {/* Product Details Tabs */}
           <div className={`mt-16 ${fadeIn({ direction: 'up' })}`}>
-            <Tabs defaultValue="specifications">
-              <TabsList className="w-full grid grid-cols-3 mb-6">
-                <TabsTrigger value="specifications">Especificaciones</TabsTrigger>
-                <TabsTrigger value="description">Descripción Detallada</TabsTrigger>
-                <TabsTrigger value="guide">Guía de Uso</TabsTrigger>
+            <Tabs defaultValue="description">
+              <TabsList className="w-full grid grid-cols-4 mb-6">
+                <TabsTrigger value="description">Descripción</TabsTrigger>
+                <TabsTrigger value="specifications">Especificaciones Técnicas</TabsTrigger>
+                <TabsTrigger value="features">Funcionalidades</TabsTrigger>
+                <TabsTrigger value="diagram">Diagrama</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="description" className="p-6 bg-white rounded-lg border border-gray-200">
+                <h3 className="text-xl font-medium text-ruway-secondary mb-4">
+                  Descripción Detallada
+                </h3>
+                <div className="prose text-ruway-gray max-w-none">
+                  <p>{product.description}</p>
+                </div>
+              </TabsContent>
               
               <TabsContent value="specifications" className="p-6 bg-white rounded-lg border border-gray-200">
                 <h3 className="text-xl font-medium text-ruway-secondary mb-4">
                   Especificaciones Técnicas
                 </h3>
                 
-                {product.specs ? (
+                {product.specs && Object.keys(product.specs).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(product.specs).map(([key, value]) => (
                       <div key={key} className="py-2 border-b border-gray-100">
@@ -375,42 +400,48 @@ const ProductDetail = () => {
                 )}
               </TabsContent>
               
-              <TabsContent value="description" className="p-6 bg-white rounded-lg border border-gray-200">
+              <TabsContent value="features" className="p-6 bg-white rounded-lg border border-gray-200">
                 <h3 className="text-xl font-medium text-ruway-secondary mb-4">
-                  Descripción Detallada
+                  Funcionalidades Principales
                 </h3>
-                <div className="prose text-ruway-gray max-w-none">
-                  <p>
-                    La placa de desarrollo <strong>{product.name}</strong> es una herramienta muy potente para el prototipado rápido de proyectos con IoT (Internet de la cosas). Integra en una placa el SoM ESP-WROOM-32D que tiene como base al SoC ESP32, el conversor USB-serial CP2102 necesario para programar por USB el ESP32, reguladores y toda la electrónica.
+                
+                {product.features && product.features.length > 0 ? (
+                  <ul className="space-y-3">
+                    {product.features.map((feature, index) => (
+                      <li key={index} className="flex items-start">
+                        <Check className="mr-3 h-5 w-5 text-ruway-accent flex-shrink-0 mt-0.5" />
+                        <span className="text-ruway-gray">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-ruway-gray">
+                    No hay funcionalidades principales disponibles para este producto.
                   </p>
-                  <p className="mt-4">
-                    La plataforma ESP32 es la evolución del ESP8266, mejorando sus capacidades de comunicación y procesamiento computacional. A nivel de conectividad permite utilizar diversos protocolos de comunicación inalámbrica como: WiFi, Bluetooth y BLE. En cuanto a procesamiento, su CPU 32-bit de dos núcleos a hasta 240MHz que se pueden controlar independientemente.
-                  </p>
-                  <p className="mt-4">
-                    Además incluye internamente una gran cantidad de periféricos para la conexión con sensores táctiles capacitivos, sensor de efecto Hall, amplificadores de bajo ruido, interfaz SPI, interfaz I2S e interfaz SPI de alta velocidad, UART, I2C e I2C, aplicado en Mini Servidores Web, Procesamiento digital, Webcams, Cámara IP, Robótica móvil, Domótica y más.
-                  </p>
-                </div>
+                )}
               </TabsContent>
               
-              <TabsContent value="guide" className="p-6 bg-white rounded-lg border border-gray-200">
+              <TabsContent value="diagram" className="p-6 bg-white rounded-lg border border-gray-200">
                 <h3 className="text-xl font-medium text-ruway-secondary mb-4">
-                  Guía de Uso
+                  Diagrama del Producto
                 </h3>
-                <div className="prose text-ruway-gray max-w-none">
-                  <p>
-                    Para comenzar a utilizar este producto, recomendamos seguir los siguientes pasos:
-                  </p>
-                  <ol className="space-y-2 mt-4">
-                    <li>Descargue e instale el IDE de Arduino desde la página oficial.</li>
-                    <li>Instale el soporte para placas ESP32 utilizando el gestor de tarjetas del IDE.</li>
-                    <li>Conecte la placa a su computadora utilizando un cable micro-USB de calidad.</li>
-                    <li>Seleccione la placa y el puerto correspondientes en el IDE.</li>
-                    <li>¡Listo para programar! Puede utilizar los ejemplos incluidos o crear sus propios proyectos.</li>
-                  </ol>
-                  <p className="mt-4">
-                    Para obtener más información y tutoriales, visite nuestra sección de <Link to="/tutoriales" className="text-ruway-primary hover:underline">tutoriales</Link>.
-                  </p>
-                </div>
+                
+                {product.diagram_image ? (
+                  <div className="flex justify-center">
+                    <img 
+                      src={product.diagram_image} 
+                      alt={`Diagrama de ${product.name}`} 
+                      className="max-w-full h-auto max-h-96 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <ImageIcon className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="mt-4 text-ruway-gray">
+                      No hay diagrama disponible para este producto.
+                    </p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Search, Image, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Image, Package, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -28,6 +29,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,7 +74,10 @@ const AdminProducts = () => {
   const [featureInputs, setFeatureInputs] = useState<string[]>([""]);
   const [specInputs, setSpecInputs] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
   const [productImages, setProductImages] = useState<File[]>([]);
+  const [diagramImage, setDiagramImage] = useState<File | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [diagramUrl, setDiagramUrl] = useState<string>("");
+  const [imageValidationError, setImageValidationError] = useState("");
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -110,7 +120,14 @@ const AdminProducts = () => {
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
+      // Validate images
+      if (!editingProduct && productImages.length !== 5) {
+        setImageValidationError("Debes subir exactamente 5 imágenes para el producto");
+        return;
+      }
+      
       setIsLoading(true);
+      setImageValidationError("");
       
       // Preparar los datos del producto
       const productData = {
@@ -155,7 +172,7 @@ const AdminProducts = () => {
         toast.success("Producto creado correctamente");
       }
       
-      // Manejar las imágenes (hasta 5)
+      // Manejar las imágenes del producto (exactamente 5)
       if (productImages.length > 0) {
         const uploadPromises = productImages.map(async (file, index) => {
           const filename = `product_${productId}_${index}_${Date.now()}`;
@@ -187,6 +204,29 @@ const AdminProducts = () => {
         if (updateError) throw updateError;
       }
       
+      // Manejar el diagrama si existe
+      if (diagramImage) {
+        const diagramFilename = `diagram_${productId}_${Date.now()}`;
+        const { error: diagramError } = await supabase.storage
+          .from('product-images')
+          .upload(diagramFilename, diagramImage);
+          
+        if (diagramError) throw diagramError;
+        
+        // Obtener URL pública del diagrama
+        const { data: diagramUrlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(diagramFilename);
+          
+        // Actualizar el producto con la URL del diagrama
+        const { error: updateDiagramError } = await supabase
+          .from('products')
+          .update({ diagram_image: diagramUrlData.publicUrl })
+          .eq('id', productId);
+          
+        if (updateDiagramError) throw updateDiagramError;
+      }
+      
       // Recargar productos
       const updatedProducts = await fetchProducts();
       setProducts(updatedProducts);
@@ -197,7 +237,9 @@ const AdminProducts = () => {
       setFeatureInputs([""]);
       setSpecInputs([{ key: "", value: "" }]);
       setProductImages([]);
+      setDiagramImage(null);
       setImageUrls([]);
+      setDiagramUrl("");
       form.reset();
       
     } catch (error) {
@@ -241,6 +283,17 @@ const AdminProducts = () => {
     // Configurar imágenes existentes
     if (product.images?.length) {
       setImageUrls(product.images);
+    } else if (product.image) {
+      setImageUrls([product.image]);
+    } else {
+      setImageUrls([]);
+    }
+    
+    // Configurar diagrama existente
+    if (product.diagram_image) {
+      setDiagramUrl(product.diagram_image);
+    } else {
+      setDiagramUrl("");
     }
     
     setIsDialogOpen(true);
@@ -305,24 +358,48 @@ const AdminProducts = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProductImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     
+    // Reset validation error
+    setImageValidationError("");
+    
     const newImages = Array.from(files);
-    const totalImages = [...productImages, ...newImages];
     
-    // Limitar a 5 imágenes
-    if (totalImages.length > 5) {
-      toast.error("Máximo 5 imágenes permitidas");
-      return;
+    // Check if we have exactly 5 images 
+    if (editingProduct) {
+      // For editing, we replace all images
+      setProductImages(newImages);
+      
+      // Create URLs for preview
+      const newUrls = newImages.map(file => URL.createObjectURL(file));
+      setImageUrls(newUrls);
+    } else {
+      // For new products, we accumulate up to 5 images
+      const totalImages = [...productImages, ...newImages];
+      
+      // Limit to 5 images max
+      if (totalImages.length > 5) {
+        setImageValidationError("Solo puedes seleccionar hasta 5 imágenes en total");
+        return;
+      }
+      
+      setProductImages(totalImages);
+      
+      // Create URLs for preview
+      const newUrls = totalImages.map(file => URL.createObjectURL(file));
+      setImageUrls(newUrls);
     }
+  };
+
+  const handleDiagramChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    setProductImages(totalImages);
-    
-    // Crear URLs para vista previa
-    const newUrls = totalImages.map(file => URL.createObjectURL(file));
-    setImageUrls(newUrls);
+    const file = files[0];
+    setDiagramImage(file);
+    setDiagramUrl(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = (index: number) => {
@@ -331,6 +408,16 @@ const AdminProducts = () => {
     
     const updatedUrls = imageUrls.filter((_, i) => i !== index);
     setImageUrls(updatedUrls);
+    
+    // Clear validation error if applicable
+    if (imageValidationError && updatedImages.length <= 5) {
+      setImageValidationError("");
+    }
+  };
+
+  const handleRemoveDiagram = () => {
+    setDiagramImage(null);
+    setDiagramUrl("");
   };
 
   return (
@@ -367,7 +454,10 @@ const AdminProducts = () => {
                 setFeatureInputs([""]);
                 setSpecInputs([{ key: "", value: "" }]);
                 setProductImages([]);
+                setDiagramImage(null);
                 setImageUrls([]);
+                setDiagramUrl("");
+                setImageValidationError("");
               }}
             >
               <Plus className="mr-2" size={16} />
@@ -531,54 +621,129 @@ const AdminProducts = () => {
                     />
                   </div>
                   
-                  {/* Especificaciones y Características */}
+                  {/* Imágenes del Producto */}
                   <div className="space-y-4">
-                    {/* Imágenes */}
-                    <div>
-                      <FormLabel className="block mb-2">Imágenes (Máximo 5)</FormLabel>
-                      <div className="border border-dashed border-gray-300 rounded-md p-4 mb-4">
-                        <div className="flex items-center justify-center mb-4">
-                          <label className="cursor-pointer">
-                            <div className="flex items-center justify-center">
-                              <Button type="button" variant="outline">
-                                <Image className="mr-2" size={16} />
-                                {imageUrls.length ? "Cambiar Imágenes" : "Subir Imágenes"}
-                              </Button>
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="images">
+                        <AccordionTrigger className="font-medium">
+                          Imágenes del Producto (Requerido: 5 imágenes)
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="border border-dashed border-gray-300 rounded-md p-4 mb-4">
+                            <div className="flex items-center justify-center mb-4">
+                              <label className="cursor-pointer">
+                                <div className="flex items-center justify-center">
+                                  <Button type="button" variant="outline">
+                                    <Image className="mr-2" size={16} />
+                                    {imageUrls.length ? "Cambiar Imágenes" : "Subir Imágenes"}
+                                  </Button>
+                                </div>
+                                <input
+                                  type="file"
+                                  multiple
+                                  onChange={handleProductImagesChange}
+                                  className="hidden"
+                                  accept="image/*"
+                                  title="Selecciona exactamente 5 imágenes"
+                                />
+                              </label>
                             </div>
-                            <input
-                              type="file"
-                              multiple
-                              onChange={handleImageChange}
-                              className="hidden"
-                              accept="image/*"
-                            />
-                          </label>
-                        </div>
-                        
-                        {imageUrls.length > 0 && (
-                          <div className="grid grid-cols-3 gap-3">
-                            {imageUrls.map((url, index) => (
-                              <div key={index} className="relative">
+                            
+                            {imageValidationError && (
+                              <div className="text-sm text-destructive mb-2 text-center">
+                                {imageValidationError}
+                              </div>
+                            )}
+                            
+                            <div className="text-center text-sm mb-4">
+                              {editingProduct ? (
+                                "Se reemplazarán todas las imágenes existentes"
+                              ) : (
+                                `${imageUrls.length} de 5 imágenes seleccionadas`
+                              )}
+                            </div>
+                            
+                            {imageUrls.length > 0 && (
+                              <div className="grid grid-cols-5 gap-3">
+                                {imageUrls.map((url, index) => (
+                                  <div key={index} className="relative">
+                                    <img
+                                      src={url}
+                                      alt={`Vista previa ${index + 1}`}
+                                      className="w-full h-24 object-cover rounded-md border"
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size="icon"
+                                      className="absolute top-0 right-0 h-6 w-6 rounded-full translate-x-1/3 -translate-y-1/3"
+                                      onClick={() => handleRemoveImage(index)}
+                                    >
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                ))}
+                                
+                                {/* Agregar placeholders para imágenes faltantes */}
+                                {Array.from({ length: Math.max(0, 5 - imageUrls.length) }).map((_, index) => (
+                                  <div 
+                                    key={`placeholder-${index}`} 
+                                    className="border border-dashed border-gray-300 rounded-md h-24 flex items-center justify-center bg-gray-50"
+                                  >
+                                    <span className="text-gray-400 text-xs">Imagen {imageUrls.length + index + 1}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      <AccordionItem value="diagram">
+                        <AccordionTrigger className="font-medium">
+                          Diagrama del Producto (Opcional)
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="border border-dashed border-gray-300 rounded-md p-4">
+                            <div className="flex items-center justify-center mb-4">
+                              <label className="cursor-pointer">
+                                <div className="flex items-center justify-center">
+                                  <Button type="button" variant="outline">
+                                    <FileImage className="mr-2" size={16} />
+                                    {diagramUrl ? "Cambiar Diagrama" : "Subir Diagrama"}
+                                  </Button>
+                                </div>
+                                <input
+                                  type="file"
+                                  onChange={handleDiagramChange}
+                                  className="hidden"
+                                  accept="image/*"
+                                />
+                              </label>
+                            </div>
+                            
+                            {diagramUrl && (
+                              <div className="relative">
                                 <img
-                                  src={url}
-                                  alt={`Preview ${index}`}
-                                  className="w-full h-24 object-cover rounded-md border"
+                                  src={diagramUrl}
+                                  alt="Diagrama del producto"
+                                  className="max-w-full h-auto rounded-md border max-h-48 mx-auto"
                                 />
                                 <Button
                                   type="button"
                                   variant="destructive"
                                   size="icon"
                                   className="absolute top-0 right-0 h-6 w-6 rounded-full translate-x-1/3 -translate-y-1/3"
-                                  onClick={() => handleRemoveImage(index)}
+                                  onClick={handleRemoveDiagram}
                                 >
                                   <Trash2 size={12} />
                                 </Button>
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                     
                     {/* Características */}
                     <div>
@@ -664,6 +829,9 @@ const AdminProducts = () => {
                 </div>
                 
                 <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline" type="button">Cancelar</Button>
+                  </DialogClose>
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? "Guardando..." : editingProduct ? "Actualizar Producto" : "Crear Producto"}
                   </Button>
