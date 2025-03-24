@@ -179,17 +179,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
           
           // Get user email from auth
-          const { data: authData, error: authError } = await supabase.auth.admin.getUserById(
-            profiles.id
-          );
+          const { data: userData, error: authError } = await supabase
+            .from('users')
+            .select('email')
+            .eq('id', profiles.id)
+            .single();
           
-          if (authError || !authData || !authData.user.email) {
+          if (authError || !userData || !userData.email) {
             throw new Error('Usuario no encontrado');
           }
           
           // Login with the found email
           signInResult = await supabase.auth.signInWithPassword({
-            email: authData.user.email,
+            email: userData.email,
             password,
           });
         }
@@ -262,6 +264,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("El nombre de usuario ya está en uso");
       }
       
+      console.log('Registering with email:', userEmail);
+      
       // Register the user with Supabase Auth
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: userEmail,
@@ -278,10 +282,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
       
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        throw signUpError;
+      }
       
       // If successful, insert or update the user's profile information
-      if (data.user) {
+      if (data && data.user) {
+        console.log('User created:', data.user.id);
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
@@ -292,7 +301,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             phone,
           });
         
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile insert error:', profileError);
+          throw profileError;
+        }
+        
+        console.log('Profile created/updated successfully');
         
         setUser({
           id: data.user.id,
@@ -306,6 +320,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         toast.success("¡Registro exitoso!");
         navigate('/');
+      } else {
+        console.error('No user data returned from signUp');
+        throw new Error('Error during registration - no user data returned');
       }
     } catch (err: any) {
       console.error("Registration error:", err);
