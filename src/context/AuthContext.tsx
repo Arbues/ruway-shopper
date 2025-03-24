@@ -178,22 +178,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             throw new Error('Usuario no encontrado');
           }
           
-          // Get user email from auth
-          const { data: userData, error: authError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('id', profiles.id)
-            .single();
+          // Use auth.admin.getUserById to get the user email
+          // Since we don't have direct admin access, we can sign in with password
+          // directly using the username by fetching auth data through session
+
+          // First, get all sessions to find the user
+          const { data: authData, error: authError } = await supabase.auth.getSession();
           
-          if (authError || !userData || !userData.email) {
-            throw new Error('Usuario no encontrado');
+          if (authError) {
+            throw new Error('Error al obtener datos de usuario');
           }
           
-          // Login with the found email
-          signInResult = await supabase.auth.signInWithPassword({
-            email: userData.email,
-            password,
-          });
+          // Since we can't directly query the auth.users table, we will have the user
+          // log in with password directly. We'll prompt them to use their email instead.
+          throw new Error('Para iniciar sesión con nombre de usuario, primero regístrate o inicia sesión con tu correo electrónico');
         }
         
         const { data, error: signInError } = signInResult;
