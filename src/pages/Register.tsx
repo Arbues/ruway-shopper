@@ -104,7 +104,9 @@ const Register = () => {
     }
     
     try {
-      await register(name, username, dni, phone, email, password, navigate);
+      // Pass email as null if empty to avoid rate limit issues
+      const emailToUse = email.trim() ? email : null;
+      await register(name, username, dni, phone, emailToUse, password, navigate);
     } catch (error) {
       console.error("Registration error:", error);
     }

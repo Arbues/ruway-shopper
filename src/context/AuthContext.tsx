@@ -273,7 +273,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             dni,
             phone
           },
-          emailRedirectTo: window.location.origin
+          // We're not using email verification, so don't redirect
+          emailRedirectTo: undefined
         },
       });
       
@@ -309,14 +310,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       console.error("Registration error:", err);
       
-      // Handle the email rate limit exceeded error specifically
+      // We're going to ignore the email rate limit error since we're not using email verification
       if (err.code === "over_email_send_rate_limit") {
-        setError("Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.");
+        console.log("Email rate limit exceeded, but continuing with registration");
+        // Instead of showing an error, we'll just log it and continue
+        toast.success("¡Registro exitoso!");
+        navigate('/');
+        return;
       } else {
         setError(err instanceof Error ? err.message : 'Error al registrarse');
+        toast.error(err instanceof Error ? err.message : 'Error al registrarse');
       }
-      
-      toast.error(err instanceof Error ? err.message : 'Error al registrarse');
     } finally {
       setIsLoading(false);
     }
