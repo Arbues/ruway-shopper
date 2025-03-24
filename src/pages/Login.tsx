@@ -25,7 +25,7 @@ const Login = () => {
   const location = useLocation();
   const { login, isLoading, error, isAuthenticated } = useAuth();
   
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -43,7 +43,7 @@ const Login = () => {
     e.preventDefault();
     
     try {
-      await login(email, password, navigate, from);
+      await login(identifier, password, navigate, from);
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -79,17 +79,17 @@ const Login = () => {
                   )}
                   
                   <div className="space-y-1">
-                    <Label htmlFor="email">Correo Electrónico</Label>
+                    <Label htmlFor="identifier">Usuario o Correo Electrónico</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <User className="h-4 w-4 text-infinitywits-gray" />
                       </div>
                       <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="correo@ejemplo.com"
+                        id="identifier"
+                        type="text"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        placeholder="usuario o correo"
                         className="pl-10"
                         required
                       />
@@ -159,7 +159,7 @@ const Login = () => {
             <div className="mt-6 text-center">
               <div className="text-xs text-infinitywits-gray">
                 Para pruebas, puedes iniciar sesión con:<br />
-                Email: <span className="font-medium">demo@infinitywits.com</span><br />
+                Usuario: <span className="font-medium">demo</span><br />
                 Contraseña: <span className="font-medium">password</span>
               </div>
             </div>

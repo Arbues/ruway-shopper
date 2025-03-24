@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 export interface User {
   id: string;
   email: string | null;
+  username: string;
   name: string;
   dni: string | null;
   phone: string | null;
@@ -17,14 +18,15 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, navigate: (path: string) => void, from?: string) => Promise<void>;
-  register: (name: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => Promise<void>;
+  login: (identifier: string, password: string, navigate: (path: string) => void, from?: string) => Promise<void>;
+  register: (name: string, username: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => Promise<void>;
   logout: () => void;
   error: string | null;
 }
 
 const ADMIN_CREDENTIALS = {
   email: "admin@infinitywits.com",
+  username: "admin",
   password: "987 762 577",
   name: "Jose Muñoz"
 };
@@ -54,13 +56,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Get user profile data
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('name, dni, phone')
+            .select('name, dni, phone, username')
             .eq('id', authUser.id)
             .single();
           
           setUser({
             id: authUser.id,
             email: authUser.email,
+            username: profileData?.username || authUser.user_metadata?.username || ADMIN_CREDENTIALS.username,
             name: profileData?.name || authUser.user_metadata?.name || ADMIN_CREDENTIALS.name,
             dni: profileData?.dni || authUser.user_metadata?.dni || null,
             phone: profileData?.phone || authUser.user_metadata?.phone || null,
@@ -86,13 +89,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Get user profile data
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('name, dni, phone')
+            .select('name, dni, phone, username')
             .eq('id', authUser.id)
             .single();
           
           setUser({
             id: authUser.id,
             email: authUser.email,
+            username: profileData?.username || authUser.user_metadata?.username || '',
             name: profileData?.name || authUser.user_metadata?.name || '',
             dni: profileData?.dni || authUser.user_metadata?.dni || null,
             phone: profileData?.phone || authUser.user_metadata?.phone || null,
@@ -110,13 +114,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const login = async (email: string, password: string, navigate: (path: string) => void, from: string = '/') => {
+  const login = async (identifier: string, password: string, navigate: (path: string) => void, from: string = '/') => {
     setIsLoading(true);
     setError(null);
     
     try {
       // Check if these are admin credentials
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+      if ((identifier === ADMIN_CREDENTIALS.email || identifier === ADMIN_CREDENTIALS.username) && password === ADMIN_CREDENTIALS.password) {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: ADMIN_CREDENTIALS.email,
           password: ADMIN_CREDENTIALS.password,
@@ -128,6 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser({
             id: data.user.id,
             email: data.user.email,
+            username: ADMIN_CREDENTIALS.username,
             name: ADMIN_CREDENTIALS.name,
             dni: null,
             phone: null,
@@ -137,11 +142,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           navigate(from);
         }
       } else {
-        // Regular user login
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Try to determine if the identifier is an email or username
+        const isEmail = /\S+@\S+\.\S+/.test(identifier);
+        
+        let signInResult;
+        
+        if (isEmail) {
+          // Login with email
+          signInResult = await supabase.auth.signInWithPassword({
+            email: identifier,
+            password,
+          });
+        } else {
+          // Find user by username
+          const { data: users } = await supabase
+            .from('profiles')
+            .select('id, email')
+            .eq('username', identifier)
+            .single();
+          
+          if (!users || !users.email) {
+            throw new Error('Usuario no encontrado');
+          }
+          
+          // Login with the found email
+          signInResult = await supabase.auth.signInWithPassword({
+            email: users.email,
+            password,
+          });
+        }
+        
+        const { data, error: signInError } = signInResult;
         
         if (signInError) throw signInError;
         
@@ -149,13 +180,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Get user profile data
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('name, dni, phone')
+            .select('name, dni, phone, username')
             .eq('id', data.user.id)
             .single();
           
           setUser({
             id: data.user.id,
             email: data.user.email,
+            username: profileData?.username || data.user.user_metadata?.username || '',
             name: profileData?.name || data.user.user_metadata?.name || '',
             dni: profileData?.dni || data.user.user_metadata?.dni || null,
             phone: profileData?.phone || data.user.user_metadata?.phone || null,
@@ -174,51 +206,86 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (name: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => {
+  const register = async (name: string, username: string, dni: string, phone: string, email: string | null, password: string, navigate: (path: string) => void) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // Check if email is provided (optional)
-      if (!email) {
-        // Generate a placeholder email using dni
-        email = `user_${dni}@placeholder.com`;
+      // Generate a placeholder email using username if not provided
+      const userEmail = email && email.trim() 
+        ? email.trim() 
+        : `${username}@placeholder.infinitywits.com`;
+      
+      // Prevent registration with admin email or username
+      if (userEmail === ADMIN_CREDENTIALS.email || username === ADMIN_CREDENTIALS.username) {
+        throw new Error("Este usuario o correo electrónico no está disponible para registro");
       }
       
-      // Prevent registration with admin email
-      if (email === ADMIN_CREDENTIALS.email) {
-        throw new Error("Este correo electrónico no está disponible para registro");
+      // Check if username already exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (existingUser) {
+        throw new Error("El nombre de usuario ya está en uso");
       }
       
+      // Register the user with Supabase Auth
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
+        email: userEmail,
         password,
         options: {
           data: {
             name,
+            username,
             dni,
             phone
           },
+          emailRedirectTo: window.location.origin
         },
       });
       
       if (signUpError) throw signUpError;
       
+      // If successful, insert or update the user's profile information
       if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            name,
+            username,
+            dni,
+            phone,
+          });
+        
+        if (profileError) throw profileError;
+        
         setUser({
           id: data.user.id,
           email: data.user.email,
-          name: name,
-          dni: dni,
-          phone: phone,
+          username,
+          name,
+          dni,
+          phone,
           isAdmin: false
         });
+        
         toast.success("¡Registro exitoso!");
         navigate('/');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Registration error:", err);
-      setError(err instanceof Error ? err.message : 'Error al registrarse');
+      
+      // Handle the email rate limit exceeded error specifically
+      if (err.code === "over_email_send_rate_limit") {
+        setError("Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.");
+      } else {
+        setError(err instanceof Error ? err.message : 'Error al registrarse');
+      }
+      
       toast.error(err instanceof Error ? err.message : 'Error al registrarse');
     } finally {
       setIsLoading(false);

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { User, Mail, Lock, AlertCircle, CreditCard, Phone } from "lucide-react";
+import { User, Mail, Lock, AlertCircle, CreditCard, Phone, UserCircle } from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -26,6 +26,7 @@ const Register = () => {
   const { register, isLoading, error } = useAuth();
   
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [dni, setDni] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,6 +42,11 @@ const Register = () => {
 
     if (!name.trim()) {
       errors.name = "El nombre completo es requerido";
+      isValid = false;
+    }
+
+    if (!username.trim()) {
+      errors.username = "El nombre de usuario es requerido";
       isValid = false;
     }
 
@@ -60,11 +66,7 @@ const Register = () => {
       isValid = false;
     }
 
-    // Email is optional, but if provided, should be valid
-    if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
-      errors.email = "Correo electrónico inválido";
-      isValid = false;
-    }
+    // Email is completely optional
 
     if (!password) {
       errors.password = "La contraseña es requerida";
@@ -96,7 +98,7 @@ const Register = () => {
     }
     
     try {
-      await register(name, dni, phone, email.trim() ? email : null, password, navigate);
+      await register(name, username, dni, phone, email, password, navigate);
     } catch (error) {
       console.error("Registration error:", error);
     }
@@ -149,6 +151,27 @@ const Register = () => {
                     </div>
                     {formErrors.name && (
                       <p className="text-xs text-destructive mt-1">{formErrors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="username">Nombre de Usuario *</Label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <UserCircle className="h-4 w-4 text-infinitywits-gray" />
+                      </div>
+                      <Input
+                        id="username"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="juanperez123"
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    {formErrors.username && (
+                      <p className="text-xs text-destructive mt-1">{formErrors.username}</p>
                     )}
                   </div>
 
