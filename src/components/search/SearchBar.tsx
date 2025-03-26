@@ -20,6 +20,7 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const searchBarRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Buscar productos cuando el usuario escribe
   useEffect(() => {
@@ -56,6 +57,16 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Mantener el foco en el input cuando se abre el desplegable
+  useEffect(() => {
+    if (open && inputRef.current) {
+      // Aseguramos que el input mantiene el foco cuando se abre el popover
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [open]);
+
   // Manejar la búsqueda completa
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +85,26 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
     }).format(price);
   };
 
+  // Manejar cambios en el input
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Solo mostrar resultados si hay al menos 2 caracteres
+    if (value.trim().length >= 2) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  // Manejar click en un item
+  const handleSelectItem = (productId: string) => {
+    navigate(`/producto/${productId}`);
+    setOpen(false);
+    setSearchQuery("");
+  };
+
   return (
     <div ref={searchBarRef} className={cn("relative w-full", className)}>
       <form onSubmit={handleSearch}>
@@ -81,6 +112,7 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
           <PopoverTrigger asChild>
             <div className="relative w-full">
               <Input
+                ref={inputRef}
                 type="text"
                 placeholder="Buscar productos..."
                 className={cn(
@@ -88,12 +120,10 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
                   isMobile ? "text-base" : ""
                 )}
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (e.target.value.trim().length >= 2) {
+                onChange={handleInputChange}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) {
                     setOpen(true);
-                  } else {
-                    setOpen(false);
                   }
                 }}
               />
@@ -109,6 +139,12 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
             className="p-0 border-infinitywits-navy bg-infinitywits-cream w-full max-w-[350px] md:max-w-[450px]"
             align="start"
             sideOffset={5}
+            onInteractOutside={(e) => {
+              // Prevenir que el popup se cierre si se está interactuando con él
+              if (searchBarRef.current?.contains(e.target as Node)) {
+                e.preventDefault();
+              }
+            }}
           >
             <Command className="bg-infinitywits-cream rounded-lg">
               <CommandList>
@@ -126,11 +162,7 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
                       {searchResults.map((product) => (
                         <CommandItem
                           key={product.id}
-                          onSelect={() => {
-                            navigate(`/producto/${product.id}`);
-                            setOpen(false);
-                            setSearchQuery("");
-                          }}
+                          onSelect={() => handleSelectItem(product.id)}
                           className="flex items-center py-3 hover:bg-infinitywits-lightblue cursor-pointer"
                         >
                           <div className="flex w-full items-center gap-2">
@@ -156,9 +188,7 @@ const SearchBar = ({ className, isMobile = false }: SearchBarProps) => {
                     {searchQuery.trim().length >= 2 && (
                       <div className="p-2 border-t border-gray-200">
                         <button
-                          onClick={(e) => {
-                            handleSearch(e);
-                          }}
+                          onClick={handleSearch}
                           className="w-full py-2 text-sm text-center text-infinitywits-cream bg-infinitywits-navy rounded-md hover:bg-infinitywits-navy/90 transition-colors"
                         >
                           Ver todos los resultados
