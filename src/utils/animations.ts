@@ -12,6 +12,7 @@ interface AnimationProps {
   delayMultiplier?: DelayMultiplier;
   className?: string;
   index?: number;
+  delay?: number; // Add the delay property
 }
 
 export const fadeIn = ({ 
@@ -19,7 +20,8 @@ export const fadeIn = ({
   staggerChildren = false, 
   delayMultiplier = 0.1, 
   className = '', 
-  index = 0 
+  index = 0,
+  delay = 0 // Add default value
 }: AnimationProps) => {
   const baseStyles = "opacity-0";
   const animationStyles = {
@@ -29,12 +31,13 @@ export const fadeIn = ({
     'right': 'transform translate-x-[20px] animate-fade-in',
   };
 
-  const delay = staggerChildren ? `delay-[${index * delayMultiplier}s]` : '';
+  // Use the delay parameter to calculate the total delay
+  const delayValue = staggerChildren ? `delay-[${(index * delayMultiplier) + delay}s]` : delay > 0 ? `delay-[${delay}s]` : '';
   
   return cn(
     baseStyles,
     animationStyles[direction],
-    delay,
+    delayValue,
     className
   );
 };
