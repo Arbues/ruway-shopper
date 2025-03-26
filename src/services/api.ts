@@ -1,4 +1,3 @@
-
 // API service for Supabase integration
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
@@ -45,6 +44,31 @@ export interface Settings {
   email?: string;
   website?: string;
   yape_qr?: string;
+}
+
+export interface Order {
+  id: string;
+  user_id?: string;
+  total: number;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  payment_status: 'pending' | 'paid' | 'failed';
+  shipping_address?: string;
+  created_at: string;
+  updated_at: string;
+  customer_data?: {
+    dni: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
 }
 
 // API functions
@@ -340,4 +364,58 @@ export const uploadSettingsImage = async (file: File, path: string): Promise<str
     .getPublicUrl(path);
 
   return urlData.publicUrl;
+};
+
+// Create order function
+export const createOrder = async (orderData: Partial<Order>, items: { product_id: string, quantity: number, price: number }[]): Promise<Order | null> => {
+  try {
+    // First create the order
+    const { data: orderResult, error: orderError } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select()
+      .single();
+
+    if (orderError) {
+      console.error("Error creating order:", orderError);
+      return null;
+    }
+
+    if (!orderResult) return null;
+
+    // Then create order items
+    const orderItems = items.map(item => ({
+      order_id: orderResult.id,
+      ...item
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) {
+      console.error("Error creating order items:", itemsError);
+      // You might want to delete the order here as a cleanup
+      return null;
+    }
+
+    return orderResult;
+  } catch (error) {
+    console.error("Error in createOrder:", error);
+    return null;
+  }
+};
+
+export const updateUserProfile = async (userId: string, profileData: Partial<User>): Promise<boolean> => {
+  const { error } = await supabase
+    .from('profiles')
+    .update(profileData)
+    .eq('id', userId);
+
+  if (error) {
+    console.error("Error updating user profile:", error);
+    return false;
+  }
+
+  return true;
 };

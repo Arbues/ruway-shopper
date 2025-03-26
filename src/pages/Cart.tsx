@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
@@ -24,11 +23,13 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/context/CartContext";
 import { fadeIn } from "@/utils/animations";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { items, totalPrice, updateItemQuantity, removeItem, clearCart } = useCart();
   const [couponCode, setCouponCode] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const navigate = useNavigate();
 
   const handleQuantityChange = (productId: string, quantity: number) => {
     updateItemQuantity(productId, quantity);
@@ -242,14 +243,10 @@ const Cart = () => {
                   
                   <CardFooter>
                     <Button 
-                      className="w-full"
-                      size="lg"
-                      asChild
+                      onClick={() => navigate('/checkout')} 
+                      className="bg-infinitywits-navy hover:bg-infinitywits-navy/90"
                     >
-                      <Link to="/checkout" className="flex items-center justify-center">
-                        Proceder al Pago
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
+                      Procesar Compra
                     </Button>
                   </CardFooter>
                 </Card>
