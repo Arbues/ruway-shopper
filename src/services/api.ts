@@ -50,7 +50,7 @@ export interface Order {
   id: string;
   user_id?: string;
   total: number;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'shipped';
   payment_status: 'pending' | 'paid' | 'failed';
   shipping_address?: string;
   created_at: string;
@@ -367,12 +367,19 @@ export const uploadSettingsImage = async (file: File, path: string): Promise<str
 };
 
 // Create order function
-export const createOrder = async (orderData: Partial<Order>, items: { product_id: string, quantity: number, price: number }[]): Promise<Order | null> => {
+export const createOrder = async (orderData: Partial<Order> & { total: number }, items: { product_id: string, quantity: number, price: number }[]): Promise<Order | null> => {
   try {
+    // Make sure status is a valid value
+    const safeOrderData = {
+      ...orderData,
+      status: (orderData.status || 'pending') as 'pending' | 'processing' | 'completed' | 'cancelled' | 'shipped',
+      payment_status: (orderData.payment_status || 'pending') as 'pending' | 'paid' | 'failed'
+    };
+
     // First create the order
     const { data: orderResult, error: orderError } = await supabase
       .from('orders')
-      .insert(orderData)
+      .insert(safeOrderData)
       .select()
       .single();
 
@@ -399,7 +406,7 @@ export const createOrder = async (orderData: Partial<Order>, items: { product_id
       return null;
     }
 
-    return orderResult;
+    return orderResult as Order;
   } catch (error) {
     console.error("Error in createOrder:", error);
     return null;
