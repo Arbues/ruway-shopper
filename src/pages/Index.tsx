@@ -1,216 +1,226 @@
-
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Zap, Truck, ShieldCheck, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { ArrowRight, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ui/ProductCard";
 import CategoryCard from "@/components/ui/CategoryCard";
-import { fetchCategories, fetchProducts, Category, Product } from "@/services/api";
+import { fetchProducts, fetchCategories, Product, Category } from "@/services/api";
 import { fadeIn } from "@/utils/animations";
 
 const Index = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true);
       try {
-        const [categoriesData, productsData] = await Promise.all([
-          fetchCategories(),
-          fetchProducts()
-        ]);
+        setIsLoading(true);
         
+        // Fetch featured products
+        const productsData = await fetchProducts();
+        setProducts(productsData.slice(0, 4)); // Show only 4 featured products
+        
+        // Fetch categories
+        const categoriesData = await fetchCategories();
         setCategories(categoriesData);
-        // For MVP, just showing all products as featured
-        setFeaturedProducts(productsData);
       } catch (error) {
-        console.error("Error loading home page data:", error);
+        console.error("Error loading home data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     loadData();
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-infinitywits-cream">
       <Navbar />
       
-      <main className="flex-grow pt-20">
-        {/* Hero Section */}
-        <section className="relative bg-ruway-light py-20 overflow-hidden">
-          <div className="container-custom relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div className={fadeIn({ direction: 'right' })}>
-                <h1 className="text-4xl md:text-5xl font-bold text-ruway-secondary leading-tight mb-4">
-                  Tecnología y Electrónica para tus Proyectos
-                </h1>
-                <p className="text-lg text-ruway-gray mb-8 max-w-lg">
-                  Descubre los mejores componentes y herramientas para tus proyectos electrónicos, IoT y desarrollo.
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  <Button size="lg" asChild>
-                    <Link to="/productos">
-                      Explorar Productos
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/categoria/microcontroladores">
-                      Ver Microcontroladores
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              
-              <div className={fadeIn({ direction: 'left' })}>
-                <img 
-                  src="/placeholder.svg" 
-                  alt="Ruway Electronics" 
-                  className="w-full h-auto object-cover rounded-lg shadow-lg"
-                />
-              </div>
+      {/* Hero Section */}
+      <section className="py-24 bg-infinitywits-cream">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className={fadeIn({ direction: 'left' })}>
+              <h1 className="text-5xl font-bold text-infinitywits-navy mb-4">
+                Impulsa tu Innovación con Componentes de Calidad
+              </h1>
+              <p className="text-ruway-gray text-lg mb-6">
+                Descubre un mundo de posibilidades con nuestra selección de componentes electrónicos de vanguardia.
+              </p>
+              <Link to="/productos">
+                <Button size="lg">
+                  Explorar Productos
+                  <Zap className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
+            <div className={fadeIn({ direction: 'right' })}>
+              <img
+                src="/hero-image.svg"
+                alt="Componentes Electrónicos"
+                className="w-full rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Featured Products */}
+      <section className="py-16 bg-white">
+        <div className="container-custom">
+          <div className={fadeIn({ direction: 'down' })}>
+            <h2 className="text-3xl font-bold text-infinitywits-navy mb-2">
+              Productos Destacados
+            </h2>
+            <p className="text-ruway-gray mb-8">
+              Nuestra selección de productos más populares y de alta calidad
+            </p>
           </div>
           
-          {/* Background gradient elements */}
-          <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-ruway-primary/5 rounded-full filter blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-ruway-accent/5 rounded-full filter blur-3xl"></div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-16 bg-white">
-          <div className="container-custom">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className={`p-6 text-center ${fadeIn({ direction: 'up', index: 0 })}`}>
-                <div className="flex justify-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-ruway-primary/10 flex items-center justify-center">
-                    <Zap className="h-6 w-6 text-ruway-primary" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-medium text-ruway-secondary mb-2">Calidad Garantizada</h3>
-                <p className="text-ruway-gray">Componentes y productos originales con garantía de fábrica.</p>
-              </div>
-              
-              <div className={`p-6 text-center ${fadeIn({ direction: 'up', index: 1 })}`}>
-                <div className="flex justify-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-ruway-primary/10 flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-ruway-primary" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-medium text-ruway-secondary mb-2">Envío Rápido</h3>
-                <p className="text-ruway-gray">Envíos a todo el Perú. Gratis en compras mayores a S/200.</p>
-              </div>
-              
-              <div className={`p-6 text-center ${fadeIn({ direction: 'up', index: 2 })}`}>
-                <div className="flex justify-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-ruway-primary/10 flex items-center justify-center">
-                    <ShieldCheck className="h-6 w-6 text-ruway-primary" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-medium text-ruway-secondary mb-2">Soporte Técnico</h3>
-                <p className="text-ruway-gray">Asistencia técnica especializada para todos tus proyectos.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Categories Section */}
-        <section className="py-16 bg-gray-50">
-          <div className="container-custom">
-            <div className="mb-10 flex justify-between items-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-ruway-secondary">
-                Categorías
-              </h2>
-              <Link 
-                to="/categorias" 
-                className="text-ruway-primary hover:text-ruway-primary/80 flex items-center transition-colors"
-              >
-                Ver todo <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-            
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-36 bg-gray-200 rounded-lg animate-pulse"></div>
-                ))}
-              </div>
+              Array(4).fill(0).map((_, index) => (
+                <div 
+                  key={`prod-skeleton-${index}`} 
+                  className="h-64 bg-gray-200 rounded-lg animate-pulse"
+                ></div>
+              ))
+            ) : products.length === 0 ? (
+              <p className="col-span-full text-center text-gray-500">
+                No hay productos destacados disponibles
+              </p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categories.map((category, index) => (
-                  <CategoryCard 
-                    key={category.id} 
-                    category={category} 
-                    index={index}
-                  />
-                ))}
-              </div>
+              products.map((product, index) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  index={index}
+                />
+              ))
             )}
           </div>
-        </section>
-
-        {/* Featured Products Section */}
-        <section className="py-16 bg-white">
-          <div className="container-custom">
-            <div className="mb-10 flex justify-between items-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-ruway-secondary">
-                Productos Destacados
-              </h2>
-              <Link 
-                to="/productos" 
-                className="text-ruway-primary hover:text-ruway-primary/80 flex items-center transition-colors"
-              >
-                Ver todo <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-80 bg-gray-200 rounded-lg animate-pulse"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {featuredProducts.slice(0, 8).map((product, index) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product}
-                    index={index}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* CTA Banner */}
-        <section className="py-12 bg-ruway-secondary text-white">
-          <div className="container-custom">
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div className="text-center md:text-left mb-6 md:mb-0">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Listo para comenzar tu proyecto?</h2>
-                <p className="text-white/80">Encuentra todo lo que necesitas en un solo lugar.</p>
-              </div>
-              <Button 
-                size="lg" 
-                className="bg-white text-ruway-secondary hover:bg-white/90"
-                asChild
-              >
-                <Link to="/productos">
-                  Comprar Ahora <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+          
+          <div className={`mt-10 text-center ${fadeIn({ direction: 'up' })}`}>
+            <Link to="/productos">
+              <Button>
+                Ver todos los productos
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Categories Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container-custom">
+          <div className={fadeIn({ direction: 'down' })}>
+            <h2 className="text-3xl font-bold text-infinitywits-navy mb-2">
+              Categorías de Productos
+            </h2>
+            <p className="text-ruway-gray mb-8">
+              Explora nuestra amplia gama de categorías para encontrar lo que necesitas
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+            {isLoading ? (
+              Array(8).fill(0).map((_, index) => (
+                <div 
+                  key={`cat-skeleton-${index}`} 
+                  className="h-48 bg-gray-200 rounded-lg animate-pulse"
+                ></div>
+              ))
+            ) : categories.length === 0 ? (
+              <p className="col-span-full text-center text-gray-500">
+                No hay categorías disponibles
+              </p>
+            ) : (
+              categories.map((category, index) => (
+                <CategoryCard 
+                  key={category.id} 
+                  category={category} 
+                  index={index}
+                />
+              ))
+            )}
+          </div>
+          
+          <div className={`mt-10 text-center ${fadeIn({ direction: 'up' })}`}>
+            <Link to="/productos">
+              <Button>
+                Ver todas las categorías
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Why Choose Us Section */}
+      <section className="py-16 bg-white">
+        <div className="container-custom">
+          <div className={fadeIn({ direction: 'down' })}>
+            <h2 className="text-3xl font-bold text-infinitywits-navy mb-2">
+              ¿Por qué elegirnos?
+            </h2>
+            <p className="text-ruway-gray mb-8">
+              Comprometidos con la calidad, innovación y satisfacción del cliente
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <div className={fadeIn({ direction: 'left', delay: 0.2 })}>
+              <h3 className="text-xl font-semibold text-infinitywits-navy mb-2">
+                Amplia Selección
+              </h3>
+              <p className="text-ruway-gray">
+                Contamos con un extenso catálogo de componentes electrónicos para cubrir todas tus necesidades.
+              </p>
+            </div>
+            <div className={fadeIn({ direction: 'up', delay: 0.4 })}>
+              <h3 className="text-xl font-semibold text-infinitywits-navy mb-2">
+                Calidad Garantizada
+              </h3>
+              <p className="text-ruway-gray">
+                Trabajamos con los mejores fabricantes para asegurar la calidad y durabilidad de nuestros productos.
+              </p>
+            </div>
+            <div className={fadeIn({ direction: 'right', delay: 0.6 })}>
+              <h3 className="text-xl font-semibold text-infinitywits-navy mb-2">
+                Soporte Técnico
+              </h3>
+              <p className="text-ruway-gray">
+                Ofrecemos asesoramiento técnico especializado para ayudarte en tus proyectos.
+              </p>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-24 bg-infinitywits-navy text-white">
+        <div className="container-custom text-center">
+          <div className={fadeIn({ direction: 'down' })}>
+            <h2 className="text-4xl font-bold mb-4">
+              ¿Listo para tu próximo proyecto?
+            </h2>
+            <p className="text-lg mb-8">
+              Encuentra los componentes que necesitas y da vida a tus ideas.
+            </p>
+            <Link to="/productos">
+              <Button variant="secondary" size="lg">
+                Explorar Componentes
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
       
       <Footer />
     </div>
